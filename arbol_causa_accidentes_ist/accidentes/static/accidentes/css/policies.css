@@ -1,0 +1,204 @@
+:root{
+    --primary:#51217d;     /* morado IST */
+    --accent:#cf2484;      /* fucsia IST */
+    --ink:#111827;
+    --muted:#6b7280;
+    --panel:#ffffff;
+    --soft:#f7f7fb;
+    --border:#e6e6ef;
+    --radius:14px;
+
+    --ok:#16a34a;
+    --warn:#f59e0b;
+    --focus:#5b21b6;
+
+    --grad:linear-gradient(90deg,var(--primary),var(--accent));
+    --grad-soft:linear-gradient(135deg,#fff 0%,#faf7ff 55%,#fdf2f8 100%);
+}
+
+/* Base */
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--soft);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 16px;
+}
+.wrap{ max-width: 1100px; margin: 18px auto; padding: 0 14px; }
+
+/* Hero */
+.policies-hero{
+    display:flex; align-items:center; gap:16px;
+    background: var(--grad-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: 0 10px 26px rgba(81,33,125,.10);
+}
+.hero-logo{ flex:0 0 auto; height: 58px; width:auto; object-fit:contain; }
+.brand-text .title{ margin:0; font-weight:900; font-size:1.35rem; color:#2b2140; }
+
+/* Instructivo en desglose */
+.howto{
+    margin: .35rem 0 0;
+    padding-left: 1.15rem;
+    color:#4b4b66;
+    font-size:1rem;
+}
+.howto li{ margin:.2rem 0; }
+.howto li strong{ color:#241b38; }
+
+/* Card instrucciones / progreso */
+.card-instructions{
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,.05);
+}
+.progress{ height: 12px; background:#f1f1f7; border-radius: 999px; overflow: hidden; }
+.progress-lg{ height:14px; }
+#progressBar{
+    background-image: var(--grad);
+    background-size: 200% 100%;
+    animation: prog-move 2.2s linear infinite;
+}
+@keyframes prog-move{
+    0%{ background-position: 0% 0; }
+    100%{ background-position: 200% 0; }
+}
+
+/* Stepper */
+.stepper{ margin:0; padding:0; }
+.stepper-item{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom:10px;
+    padding:6px;
+    transition: border-color .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.stepper-item.current{ border-color:#d9c8f4; box-shadow:0 0 0 3px rgba(81,33,125,.12) inset; }
+.stepper-item.locked{ opacity:.7; filter: grayscale(.06); }
+.stepper-item.done{ border-color:#bfead0; }
+
+.stepper-button{
+    border:0; background:transparent; width:100%;
+    display:flex; align-items:center; gap:.75rem;
+    padding: .55rem;
+    border-radius: 10px;
+}
+.stepper-button:focus{ outline: none; box-shadow: 0 0 0 3px rgba(91,33,182,.25); }
+
+.stepper-badge{
+    display:inline-grid; place-items:center;
+    min-width:36px; height:36px; border-radius:50%;
+    background:#f3e8ff; color:#372a53; font-weight:900;
+    box-shadow: inset 0 -2px 0 rgba(81,33,125,.15);
+}
+.stepper-text .step-title{ display:block; font-weight:900; color:#241b38; }
+.stepper-text .step-subtitle{ font-size:.9rem; color:#6c5a88; }
+.step-status{ margin-left:auto; color:var(--ok); font-weight:900; }
+
+/* Panel / acordeón */
+.panel-card{
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    background:#fff;
+    box-shadow:0 8px 24px rgba(0,0,0,.05);
+    overflow: hidden;
+}
+.panel-header{ background:#fff; padding: 14px 16px; }
+.panel-title{ font-weight:900; color:#241b38; }
+.law-meta{ color:#5a4a73; }
+
+.policy-scroll{
+    max-height: 60vh;
+    overflow: auto;
+    padding: 16px;
+    background: #fff;
+}
+.policy-scroll::-webkit-scrollbar{ width:10px; }
+.policy-scroll::-webkit-scrollbar-thumb{ background: #d6d2e0; border-radius: 10px; }
+.policy-scroll:hover::-webkit-scrollbar-thumb{ background:#bdb7cc; }
+
+.spacer-24{ height:24px; }
+
+/* Aceptación fija (más grande y notoria) */
+.sticky-ack{
+    position: sticky; bottom: 0;
+    padding: .9rem .2rem 1rem;
+    background: linear-gradient(180deg, transparent 0, #fff 65%, #fff 100%);
+}
+.divider{ height:1px; background: var(--border); margin-bottom:.85rem; }
+
+.form-check{
+    padding: .6rem .75rem;
+    border: 1px dashed #e8defa;
+    border-radius: 12px;
+    background: #faf7ff;
+}
+.form-check-input.custom-lg{
+    transform: scale(1.25);
+    margin-right:.55rem;
+    border: 2px solid #c4b5fd;
+}
+.form-check-input.custom-lg:focus{
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(91,33,182,.18);
+    border-color:#7c3aed;
+}
+.form-check-input.custom-lg:checked{
+    background-color:#7c3aed;
+    border-color:#7c3aed;
+}
+.form-check-label{
+    font-size:1.05rem;
+    color:#221937;
+}
+
+/* Botón Aceptar: más grande, colorido y con “shine” */
+.btn-accept{
+    background: var(--grad);
+    border:0; color:#fff;
+    font-weight:900;
+    border-radius: 14px;
+    padding:.9rem 1.25rem;
+    font-size:1.06rem;
+    box-shadow: 0 10px 22px rgba(81,33,125,.25);
+    transition: transform .12s ease, filter .2s ease, box-shadow .2s ease, background-position .3s ease;
+    background-size: 180% 100%;
+    background-position: 0% 0%;
+}
+.btn-accept:hover{
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    background-position: 100% 0%;
+    box-shadow: 0 12px 26px rgba(81,33,125,.3);
+}
+.btn-accept:active{ transform: translateY(0); }
+.btn-accept:disabled{
+    background: linear-gradient(90deg,#e9e9ef,#e3e4ea);
+    color:#9aa0ad;
+    box-shadow:none;
+}
+
+/* Texto interno de políticas */
+.policy h2, .policy h3{ color: var(--primary); margin-top: 1rem; }
+.policy p, .policy li{ font-size: 1.03rem; }
+.policy a{ color: var(--accent); text-decoration: none; font-weight: 600; }
+.policy a:hover{ text-decoration: underline; }
+
+/* Accesibilidad */
+.accordion-button{ font-size: 1rem; }
+.accordion-button:focus{ box-shadow: none; }
+
+/* Ocultar contenido leído (clase añadida por JS) */
+.read-gone{ display:none !important; }
+
+/* Responsive */
+@media (max-width: 992px){
+    .brand-text .title{ font-size: 1.2rem; }
+    .stepper-text .step-subtitle{ display:none; }
+}

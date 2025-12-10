@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel de Administración{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'accidentes/img/favicon-ist.ico' %}">
+    <!-- Vendors -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Estilos del ADMINPANEL (no los de 'accidentes') -->
+    <link rel="stylesheet" href="{% static 'adminpanel/css/adminpanel.css' %}">
+</head>
+<body>
+    <div class="has-sidebar d-flex flex-nowrap">
+        {# Sidebar propio del adminpanel #}
+        {% include 'adminpanel/includes/sidebar.html' %}
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <main class="main-content flex-grow-1">
+            <nav class="custom-navbar navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <button type="button" data-sidebar-toggle class="hamburger-btn d-md-none" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <nav aria-label="breadcrumb" class="ms-2">
+                        <ol class="breadcrumb mb-0">
+                            {% if breadcrumbs %}
+                                {% for item in breadcrumbs %}
+                                    {% if item.url and not forloop.last %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ item.url }}">{{ item.label }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="breadcrumb-item active" aria-current="page">
+                                            {{ item.label }}
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    {% block page_title %}Inicio{% endblock %}
+                                </li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+
+                    <!-- Botón Volver al Home usuario normal -->
+                    <div class="ms-auto">
+                        <a href="{% url 'accidentes:home' %}"
+                           class="btn d-flex align-items-center btn-home-usuario"
+                           style="background: linear-gradient(90deg, var(--primary-color) 60%, var(--secondary-color) 100%); color: #fff; border: none; font-weight: 600; box-shadow: 0 2px 8px rgba(81,33,125,0.10); transition: transform 0.1s;"
+                           onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                            <i class="fas fa-home me-2"></i> Volver al Home
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+
+            <!-- Indicador HTMX (opcional) -->
+            <div id="relato-indicator" class="htmx-indicator position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+                <div class="spinner-border" role="status" aria-live="polite" aria-label="Cargando…" style="width:2rem;height:2rem;">
+                    <span class="visually-hidden">Cargando…</span>
+                </div>
+            </div>
+
+            <div class="container-fluid p-4">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    {# ✅ Área global de toasts (OOB-ready) reutilizando la partial de accidentes #}
+    {% include "accidentes/notification.html" %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+    {# ✅ Mismo JS de notificaciones que usas en 'accidentes' #}
+    <script src="{% static 'js/notification.js' %}"></script>
+
+    {# ✅ CSRF global para HTMX #}
+    <script>
+        (function(){
+            function getCookie(name){
+            var v = ('; '+document.cookie).split('; '+name+'=');
+            if (v.length === 2) return v.pop().split(';').shift();
+            }
+            document.body.addEventListener('htmx:configRequest', function (evt) {
+            var token = getCookie('csrftoken');
+            if (token) evt.detail.headers['X-CSRFToken'] = token;
+            });
+        })();
+    </script>
+
+    {# (Opcional) Listener para descargas vía HTMX como en 'accidentes' #}
+    <script>
+        document.body.addEventListener('file-download', function (e) {
+            var d = (e && e.detail) || {};
+            if (!d.url) return;
+            try { window.location.assign(d.url); } catch (_) { window.location = d.url; }
+            // Si quieres refrescar luego de iniciar la descarga:
+            // setTimeout(function(){ window.location.reload(); }, 1200);
+        });
+    </script>
+
+    {% block extra_js %}
+    <script>
+    (function () {
+        const STATE = { initialized: false, locked: false };
+
+        const qs  = sel => document.querySelector(sel);
+        const gid = id  => document.getElementById(id);
+
+        function openSidebar() {
+            const sidebar = gid('sidebar');
+            const overlay = gid('sidebarOverlay');
+            if (!sidebar || !overlay) {
+            console.warn('[sidebar] Falta #sidebar o #sidebarOverlay');
+            return;
+            }
+            sidebar.classList.add('show');
+            overlay.classList.add('show');
+            if (!STATE.locked) {
+            document.body.style.overflow = 'hidden';
+            STATE.locked = true;
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = gid('sidebar');
+            const overlay = gid('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+            if (STATE.locked) {
+            document.body.style.overflow = '';
+            STATE.locked = false;
+            }
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+        }
+
+        function toggleSidebar() {
+            const sidebar = gid('sidebar');
+            if (!sidebar) return;
+            sidebar.classList.contains('show') ? closeSidebar() : openSidebar();
+        }
+
+        window._sidebar = { openSidebar, closeSidebar, toggleSidebar };
+
+        function attachGlobalHandlersOnce() {
+            if (STATE.initialized) return;
+            STATE.initialized = true;
+
+            document.addEventListener('click', function (evt) {
+            const toggleBtn = evt.target.closest('[data-sidebar-toggle], #sidebarToggle');
+            if (toggleBtn) { evt.preventDefault(); toggleSidebar(); return; }
+
+            const overlay = evt.target.closest('#sidebarOverlay');
+            if (overlay) { evt.preventDefault(); closeSidebar(); return; }
+
+            const linkInsideSidebar = evt.target.closest('#sidebar .sidebar-nav-link');
+            if (linkInsideSidebar && window.innerWidth < 1200) { closeSidebar(); return; }
+            }, { passive: true });
+
+            window.addEventListener('resize', function () {
+            if (window.innerWidth >= 1200) closeSidebar();
+            });
+
+            document.addEventListener('htmx:afterSwap', function () {
+            const sidebar = gid('sidebar');
+            if (!sidebar || !sidebar.classList.contains('show')) {
+                document.body.style.overflow = '';
+                STATE.locked = false;
+            }
+            });
+
+            document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSidebar();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', attachGlobalHandlersOnce);
+        document.addEventListener('htmx:load', attachGlobalHandlersOnce);
+    })();
+    </script>
+    {% endblock %}
+</body>
+</html>

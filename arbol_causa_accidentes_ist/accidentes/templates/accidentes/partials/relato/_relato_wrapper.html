@@ -1,0 +1,310 @@
+
+{# SOLO el contenido interno de #relato-wrapper #}
+
+{# ====== Indicadores / CSS minimal ====== #}
+<style>
+  /* Indicadores htmx: se muestran solo durante la request */
+  #relato-indicator.htmx-indicator,
+  #relato-inicial-indicator.htmx-indicator,
+  #p1-indicator.htmx-indicator,
+  #p2-indicator.htmx-indicator,
+  #p3-indicator.htmx-indicator,
+  #relato-final-indicator.htmx-indicator { display: none; }
+</style>
+
+{# Indicador global (esquina inferior) #}
+<div id="relato-indicator" class="htmx-indicator position-fixed bottom-0 end-0 mb-3 me-3 d-flex align-items-center gap-2 p-2 bg-body border rounded shadow-sm">
+  <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+  <span class="small">Procesando…</span>
+</div>
+
+{# ======================= PASO 1: Generar relato inicial ======================= #}
+{% if paso == 1 %}
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body d-flex flex-column flex-md-row align-items-start gap-3">
+        <div class="flex-grow-1">
+          <h5 class="mb-1">Aún no hay un relato</h5>
+          <p class="text-muted mb-2">Genera un relato inicial en base a los datos, declaraciones y contexto disponibles.</p>
+          <p class="small text-muted mb-0"><i class="fa-regular fa-lightbulb me-1"></i>Luego podrás responder preguntas guiadas; el flujo avanzará solo.</p>
+
+          {# Indicador LOCAL para generar relato inicial #}
+          <div id="relato-inicial-indicator" class="htmx-indicator d-inline-flex align-items-center gap-2 py-1 px-2 bg-body border rounded mt-2">
+            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+            <span class="small">Generando relato inicial…</span>
+          </div>
+        </div>
+
+        <form method="post"
+              hx-post="{% url 'accidentes:ia_relato' codigo %}"
+              hx-target="#relato-wrapper"
+              hx-swap="innerHTML"
+              hx-indicator="#relato-inicial-indicator"
+              hx-queue="last">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="generar_relato">
+          <button type="submit" class="btn btn-primary-custom">
+            <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Generar relato con IA
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{# ======================= PASO 2: Construcción iterativa ======================= #}
+{% if paso == 2 and relato %}
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h6 class="mb-0"><i class="fa-regular fa-file-lines me-2"></i>Relato Inicial</h6>
+        <span class="badge text-bg-secondary">Borrador</span>
+      </div>
+      <div class="card-body">
+
+        {# --- Relato inicial editable --- #}
+        <form method="post"
+              class="mb-3 d-flex gap-2 align-items-start flex-wrap"
+              hx-post="{% url 'accidentes:ia_relato' codigo %}"
+              hx-target="#relato-wrapper"
+              hx-swap="innerHTML"
+              hx-indicator="#relato-indicator"
+              hx-queue="last">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="guardar_relato_inicial">
+          <div class="flex-grow-1 w-100">
+            <label for="relato_input" class="form-label">Relato</label>
+            <textarea id="relato_input" name="relato_input" class="form-control" rows="8" required>{{ relato.relato_inicial|default_if_none:"" }}</textarea>
+          </div>
+          <div class="d-flex align-items-start">
+            <button type="submit" class="btn btn-outline-primary mt-4">
+              <i class="fa-regular fa-floppy-disk me-2"></i>Guardar relato
+            </button>
+          </div>
+        </form>
+
+        <hr class="my-4">
+
+        {# --- Bloque Pregunta 1 --- #}
+        <div class="mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="mb-0">Pregunta 1</h6>
+          </div>
+
+          {% if not relato.pregunta_1 %}
+            <p class="text-muted mb-2">Generando Pregunta 1 automáticamente…</p>
+
+            {# Indicador LOCAL P1 #}
+            <div id="p1-indicator" class="htmx-indicator alert alert-info d-inline-flex align-items-center gap-2 py-1 px-2">
+              <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+              <span>Generando Pregunta 1…</span>
+            </div>
+
+            <form method="post" style="display:none"
+                  hx-post="{% url 'accidentes:ia_relato' codigo %}"
+                  hx-target="#relato-wrapper"
+                  hx-swap="innerHTML"
+                  hx-trigger="load once"
+                  hx-include="#relato_input"
+                  hx-indicator="#p1-indicator"
+                  hx-queue="last">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="generar_pregunta_1">
+            </form>
+          {% else %}
+            <p class="small text-muted mb-2">{{ relato.pregunta_1 }}</p>
+
+            <form method="post"
+                  class="mb-2"
+                  hx-post="{% url 'accidentes:ia_relato' codigo %}"
+                  hx-target="#relato-wrapper"
+                  hx-swap="innerHTML"
+                  hx-indicator="#relato-indicator"
+                  hx-queue="last">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="guardar_respuesta_1">
+              <label for="respuesta_1" class="form-label">Respuesta</label>
+              <textarea id="respuesta_1" name="respuesta_1" class="form-control" rows="5" required>{{ relato.respuesta_1|default_if_none:"" }}</textarea>
+              <div class="d-flex justify-content-end mt-2">
+                <button type="submit" class="btn btn-outline-primary">
+                  <i class="fa-regular fa-floppy-disk me-2"></i>Guardar respuesta 1
+                </button>
+              </div>
+            </form>
+
+            {% if relato.respuesta_1 and not relato.pregunta_2 %}
+              {# Indicador LOCAL P2 #}
+              <div id="p2-indicator" class="htmx-indicator alert alert-info d-inline-flex align-items-center gap-2 py-1 px-2 mb-2">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                <span>Generando Pregunta 2…</span>
+              </div>
+
+              <form method="post" style="display:none"
+                    hx-post="{% url 'accidentes:ia_relato' codigo %}"
+                    hx-target="#relato-wrapper"
+                    hx-swap="innerHTML"
+                    hx-trigger="load once"
+                    hx-include="#relato_input"
+                    hx-indicator="#p2-indicator"
+                    hx-queue="last">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="generar_pregunta_2">
+              </form>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <hr class="my-4">
+
+        {# --- Bloque Pregunta 2 --- #}
+        <div class="mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="mb-0">Pregunta 2</h6>
+          </div>
+
+          {% if not relato.pregunta_2 %}
+            <p class="text-muted mb-0">Se generará automáticamente al guardar la respuesta anterior.</p>
+          {% else %}
+            <p class="small text-muted mb-2">{{ relato.pregunta_2 }}</p>
+
+            <form method="post"
+                  class="mb-2"
+                  hx-post="{% url 'accidentes:ia_relato' codigo %}"
+                  hx-target="#relato-wrapper"
+                  hx-swap="innerHTML"
+                  hx-indicator="#relato-indicator"
+                  hx-queue="last">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="guardar_respuesta_2">
+              <label for="respuesta_2" class="form-label">Respuesta</label>
+              <textarea id="respuesta_2" name="respuesta_2" class="form-control" rows="5" required>{{ relato.respuesta_2|default_if_none:"" }}</textarea>
+              <div class="d-flex justify-content-end mt-2">
+                <button type="submit" class="btn btn-outline-primary">
+                  <i class="fa-regular fa-floppy-disk me-2"></i>Guardar respuesta 2
+                </button>
+              </div>
+            </form>
+
+            {% if relato.respuesta_2 and not relato.pregunta_3 %}
+              {# Indicador LOCAL P3 #}
+              <div id="p3-indicator" class="htmx-indicator alert alert-info d-inline-flex align-items-center gap-2 py-1 px-2 mb-2">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                <span>Generando Pregunta 3…</span>
+              </div>
+
+              <form method="post" style="display:none"
+                    hx-post="{% url 'accidentes:ia_relato' codigo %}"
+                    hx-target="#relato-wrapper"
+                    hx-swap="innerHTML"
+                    hx-trigger="load once"
+                    hx-include="#relato_input"
+                    hx-indicator="#p3-indicator"
+                    hx-queue="last">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="generar_pregunta_3">
+              </form>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <hr class="my-4">
+
+        {# --- Bloque Pregunta 3 --- #}
+        <div class="mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="mb-0">Pregunta 3</h6>
+          </div>
+
+          {% if not relato.pregunta_3 %}
+            <p class="text-muted mb-0">Se generará automáticamente al guardar la respuesta anterior.</p>
+          {% else %}
+            <p class="small text-muted mb-2">{{ relato.pregunta_3 }}</p>
+
+            <form method="post"
+                  class="mb-3"
+                  hx-post="{% url 'accidentes:ia_relato' codigo %}"
+                  hx-target="#relato-wrapper"
+                  hx-swap="innerHTML"
+                  hx-indicator="#relato-indicator"
+                  hx-queue="last">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="guardar_respuesta_3">
+              <label for="respuesta_3" class="form-label">Respuesta</label>
+              <textarea id="respuesta_3" name="respuesta_3" class="form-control" rows="5" required>{{ relato.respuesta_3|default_if_none:"" }}</textarea>
+              <div class="d-flex justify-content-end mt-2">
+                <button type="submit" class="btn btn-outline-primary">
+                  <i class="fa-regular fa-floppy-disk me-2"></i>Guardar respuesta 3
+                </button>
+              </div>
+            </form>
+
+            {# Indicador visible SOLO al generar el relato final #}
+            <div id="relato-final-indicator" class="htmx-indicator alert alert-info d-inline-flex align-items-center gap-2 py-1 px-2 mb-2">
+              <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+              <span>Generando relato final…</span>
+            </div>
+
+            {% if relato.respuesta_3 and not relato.relato_final %}
+              <form method="post" style="display:none"
+                    hx-post="{% url 'accidentes:ia_relato' codigo %}"
+                    hx-target="#relato-wrapper"
+                    hx-swap="innerHTML"
+                    hx-trigger="load once"
+                    hx-include="#relato_input"
+                    hx-indicator="#relato-final-indicator"
+                    hx-queue="last">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="generar_relato_final">
+              </form>
+            {% endif %}
+
+            <div class="text-end">
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#resetModal">
+                Eliminar y reiniciar
+              </button>
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{# ======================= PASO 4: Relato final ======================= #}
+{% if paso == 4 and relato %}
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h6 class="mb-0"><i class="fa-solid fa-clipboard-check me-2"></i>Relato Final</h6>
+        <span class="badge text-bg-success">Final</span>
+      </div>
+      <div class="card-body">
+        <form method="post"
+              hx-post="{% url 'accidentes:ia_relato' codigo %}"
+              hx-target="#relato-wrapper"
+              hx-swap="innerHTML"
+              hx-indicator="#relato-indicator"
+              hx-queue="last">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="guardar_relato_final">
+
+          <label for="relato_input" class="form-label">Relato</label>
+          <textarea id="relato_input" name="relato_input" class="form-control" rows="12" required>{{ relato.relato_final|default_if_none:relato.relato_inicial }}</textarea>
+
+          <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+            <button type="submit" class="btn btn-primary-custom w-100 w-sm-auto">
+              <i class="fa-regular fa-floppy-disk me-2"></i>Guardar relato final
+            </button>
+            <button type="button" class="btn btn-outline-danger w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#resetModal">
+              <i class="fa-solid fa-rotate-left me-2"></i>Eliminar y generar nuevamente
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

@@ -1,0 +1,100 @@
+{# accidentes/templates/accidentes/declaraciones.html #}
+{% extends "accidentes/base.html" %}
+{% load static %}
+
+{% block title %}Asistente de entrevistas{% endblock %}
+
+{% block extra_css %}
+  <!--<link rel="stylesheet" href="{% static 'accidentes/css/declaraciones.css' %}">-->
+  <link rel="stylesheet" href="{% static 'accidentes/css/base.css' %}">
+{% endblock %}
+{% block content %}
+<div class="mx-auto" style="max-width: 1200px;">
+  <div class="titular-page">
+    <div class="card-header">
+      <h5 class="card-title mb-1">
+        <i class="fas fa-comments me-2" style="color: var(--primary-color);"></i>
+        Asistente de Entrevistas
+      </h5>
+      <p class="card-text text-muted mb-0">Complete las preguntas a los distintos actores</p>
+    </div>
+  </div>
+  {% include "accidentes/includes/disclaimer.html" %}
+
+  {# === Contenedor que será reemplazado por HTMX en las acciones === #}
+  <div id="declaraciones-wrapper">
+    {% include "accidentes/partials/entrevistas/_declaraciones_wrapper.html" %}
+  </div>
+  <!-- Barra fija de guardado (sticky) -->
+<div id="save-actions" class="save-actions mt-3 d-none" role="region" aria-label="Acciones de guardado masivo">
+  <div class="container-xxl px-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
+
+    <small id="save-hint" class="text-muted mb-0">
+      Guardará las respuestas escritas en <strong>Accidentado</strong>, <strong>Testigos</strong> y <strong>Supervisión</strong>.
+    </small>
+    
+    <button
+      id="btn-save-all"
+      type="button"
+      class="btn btn-primary-custom d-inline-flex align-items-center gap-2 px-3 shadow-sm"
+      hx-post="{% url 'accidentes:ia_declaraciones' codigo %}"
+      hx-vals='{"action":"save_bulk"}'
+      hx-include="#grid-accidentado form, #grid-testigo form, #grid-supervision form"
+      hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+      hx-swap="none"
+      hx-indicator="#save-all-indicator"
+      hx-disabled-elt="this"
+      title="Guardar en un paso (Ctrl+S)">
+      <span id="save-all-indicator" class="htmx-indicator spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+      <span>Guardar todas las respuestas</span>
+    </button>
+
+  </div>
+</div>
+
+
+  {# Indicador de carga para acciones HTMX #}
+  <div id="relato-indicator" class="htmx-indicator text-center my-3" aria-live="polite">
+    <div class="spinner-border" role="status" aria-hidden="true"></div>
+    <span class="ms-2">Procesando…</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    // Setea la categoría/anchor y título visible del modal
+    function setCurrentCategory(tabCat) {
+      // tabCat: 'accidentado' | 'testigo' | 'supervision'
+      document.getElementById('add-categoria').value = tabCat;
+      document.getElementById('add-anchor').value = tabCat;
+
+      const labels = {
+        accidentado: 'Accidentado',
+        testigo: 'Testigos',
+        supervision: 'Supervisores'
+      };
+      const el = document.getElementById('addModalTitleCat');
+      if (el) el.textContent = labels[tabCat] || tabCat;
+    }
+  </script>
+  <script>
+    // Listener opcional si disparas un evento custom al crear pregunta
+    document.body.addEventListener('question-added', function () {
+      const modalEl = document.getElementById('addQuestionModal');
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.hide();
+      document.getElementById('add-form')?.reset();
+    });
+  </script>
+  <script>
+    document.addEventListener('keydown', function(e){
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        document.getElementById('btn-save-all')?.click();
+      }
+    });
+  </script>
+{% endblock %}

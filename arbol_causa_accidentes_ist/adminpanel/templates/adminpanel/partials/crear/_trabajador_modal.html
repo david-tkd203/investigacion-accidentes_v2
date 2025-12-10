@@ -1,0 +1,55 @@
+<!-- adminpanel/partials/crear/_trabajador_modal.html -->
+<div class="modal-header">
+  <h5 class="modal-title">Crear trabajador</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+
+<form
+  method="post"
+  hx-post="{% url 'adminpanel:trabajador_crear' %}"
+  hx-target="#modalCrearTrabajador .modal-content"
+  hx-swap="innerHTML"
+>
+  <div class="modal-body">
+    {% csrf_token %}
+
+    {% if form.errors %}
+      <div class="alert alert-danger" role="alert">
+        Revisa los errores y vuelve a intentar.
+      </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label">RUT</label>
+      {{ form.rut_trabajador }}
+      {% if form.rut_trabajador.errors %}
+        <div class="text-danger small">{{ form.rut_trabajador.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nombre</label>
+      {{ form.nombre_trabajador }}
+      {% if form.nombre_trabajador.errors %}
+        <div class="text-danger small">{{ form.nombre_trabajador.errors }}</div>
+      {% endif %}
+    </div>
+
+    {% if not form.empresa.is_hidden %}
+      <div class="mb-3">
+        <label class="form-label">Empresa</label>
+        {{ form.empresa }}
+        {% if form.empresa.errors %}
+          <div class="text-danger small">{{ form.empresa.errors }}</div>
+        {% endif %}
+      </div>
+    {% else %}
+      {{ form.empresa }}
+    {% endif %}
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+    <button type="submit" class="btn btn-primary">Guardar</button>
+  </div>
+</form>

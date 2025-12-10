@@ -1,0 +1,127 @@
+/* accidentes/css/relato.css */
+
+/* 0) Aseguramos que los hijos de main-content se estiren al ancho completo */
+.main-content {
+    align-items: stretch;
+}
+
+/* 1) Encabezados con color institucional y alineados a la izquierda */
+.main-content h1,
+.main-content h2 {
+    color: #51287A;
+    font-weight: 600;
+    text-align: left;    /* <-- ahora a la izquierda */
+    margin-bottom: 1rem;
+}
+
+/* 2) Área de texto para el relato */
+textarea {
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    max-width: none;
+    min-height: 450px;
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    resize: vertical;
+    background-color: #fff;
+    color: #333;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    /* ya no centrado: ocupa todo el ancho disponible */
+    margin: 0;
+}
+
+/* 3) Botón con colores del logo institucional */
+button.btn-guardar {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #51287A;
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
+}
+
+button.btn-guardar:hover {
+    background-color: #3e1f5e;
+}
+
+/* 4) Mensajes de alerta */
+.messages {
+    margin-top: 1em;
+    padding: 0;
+    list-style: none;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+.messages li {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.messages li.success {
+    background-color: #e6f7e6;
+    color: #2e7d32;
+    border-left: 4px solid #81c784;
+}
+.messages li.error {
+    background-color: #ffe6e6;
+    color: #c62828;
+    border-left: 4px solid #ef9a9a;
+}
+.messages li.warning {
+    background-color: #fff8e1;
+    color: #ff6f00;
+    border-left: 4px solid #ffb74d;
+}
+
+/* 5) Relato generado en bloque */
+.relato-output {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 1.5rem;
+    white-space: pre-wrap;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: #333;
+    width: 100%;
+    max-width: none;
+    min-height: 450px;
+    box-sizing: border-box;
+    /* ya no centrado: ocupa todo el ancho disponible */
+    margin: 0;
+}
+
+/* 6) Responsive */
+@media (max-width: 600px) {
+    h1, h2 {
+        margin-bottom: 0.25rem;
+        text-align: center !important;
+    }
+    textarea,
+    .relato-output {
+        min-height: 60vh;
+    }
+    button.btn-guardar {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .messages {
+        max-width: 100%;
+    }
+
+    #relato_input {
+        max-height: 20vh;
+    }
+}

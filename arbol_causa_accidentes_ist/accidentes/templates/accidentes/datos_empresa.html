@@ -1,0 +1,9 @@
+{% extends "accidentes/base.html" %}
+{% load static %}
+
+{% block title %}Datos de la Empresa{% endblock %}
+{% block content %}
+<div id="form-container" class="mx-auto" style="max-width: 1200px;">
+  {% include "accidentes/partials/empresa/form_empresa.html" %}
+</div>
+{% endblock %}

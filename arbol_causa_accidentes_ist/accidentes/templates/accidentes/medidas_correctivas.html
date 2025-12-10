@@ -1,0 +1,53 @@
+{% extends "accidentes/base.html" %}
+{% load static %}
+{% block title %}Medidas Correctivas y Preventivas{% endblock %}
+
+{% block extra_css %}
+<!-- <link rel="stylesheet" href="{% static 'accidentes/css/medidas_correctivas.css' %}"> -->
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4 p-md-5">
+  <div class="mx-auto" style="max-width: 1200px;">
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <i class="fas fa-shield-alt fs-3" style="color: var(--primary-color);"></i>
+      <h1 class="h2 mb-0">Medidas Correctivas y Preventivas</h1>
+    </div>
+
+    {% include "accidentes/includes/disclaimer.html" %}
+
+    <!-- HTMX wrapper -->
+    <div id="mc-wrapper">
+      {% include "accidentes/partials/medidas/_medidas_wrapper.html" %}
+    </div>
+
+    <!-- Indicador de carga (usado por hx-indicator="#relato-indicator") -->
+    <div id="relato-indicator" class="htmx-indicator text-center my-3" aria-live="polite">
+      <div class="spinner-border" role="status" aria-hidden="true"></div>
+      <span class="ms-2">Procesando…</span>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  // Tooltips (inicializar al cargar y tras HTMX)
+  function initTooltips(scope=document){
+    const tts = [].slice.call(scope.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tts.forEach(el => new bootstrap.Tooltip(el));
+  }
+  document.addEventListener('DOMContentLoaded', ()=>initTooltips());
+  document.body.addEventListener('htmx:afterSwap', (e)=>initTooltips(e.target));
+
+  // Autosize textareas de edición
+  function autosize(el){ el.style.height='auto'; el.style.height=(el.scrollHeight+4)+'px'; }
+  function autosizeAll(scope=document){ scope.querySelectorAll('textarea').forEach(autosize); }
+  document.addEventListener('input', (e)=>{ if(e.target.matches('textarea')) autosize(e.target); });
+  document.addEventListener('DOMContentLoaded', ()=>autosizeAll());
+  document.body.addEventListener('htmx:afterSwap', (e)=>autosizeAll(e.target));
+</script>
+{% endblock %}

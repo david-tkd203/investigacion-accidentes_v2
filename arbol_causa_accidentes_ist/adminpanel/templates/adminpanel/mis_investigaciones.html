@@ -1,0 +1,160 @@
+{% extends "adminpanel/base_adminpanel.html" %}
+{% load static %}
+{% block title %}Mis investigaciones{% endblock %}
+{% block content %}
+<div class="container-xl px-2 px-md-3">
+<div class="card shadow-sm">
+  <div class="card-header pb-2 bg-white">
+    <h5 class="card-header mb-1">Listado de Accidentes Laborales</h5>
+    <p class="text-muted small mb-0">Gestiona y filtra todas tus investigaciones</p>
+  </div>
+
+  <div class="card-body">
+    <!-- Toggle Filtros -->
+    <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2">
+      <button
+        id="filtrosToggle"
+        class="btn btn-outline-secondary w-100 w-md-auto d-flex align-items-center justify-content-between"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#filtros"
+        aria-expanded="true"
+        aria-controls="filtros">
+        <span class="toggle-left d-inline-flex align-items-center gap-2 text-nowrap">
+          <i class="fa-solid fa-filter"></i>
+          <span>Filtros</span>
+        </span>
+        <span class="toggle-right ms-3 small text-nowrap">
+          <span class="when-open">Ocultar</span>
+          <span class="when-closed">Mostrar</span>
+        </span>
+      </button>
+
+      <!-- Limpiar filtros -->
+      <button type="button"
+        class="btn btn-outline-secondary btn-icon-text ms-md-2"
+        title="Limpiar filtros"
+        aria-label="Limpiar filtros"
+        hx-get="{% url 'adminpanel:mis_investigaciones_partial' %}"
+        hx-target="#tabla-investigaciones"
+        hx-swap="outerHTML"
+        hx-vals='{"empresa":"","mes":"","trabajador":"","investigador":""}'
+        hx-on:click="
+          (function(f){
+            if(!f) return;
+            f.querySelectorAll('select').forEach(s => { s.value = ''; });
+          })(document.getElementById('filtros'));
+        ">
+        <i class="fa-solid fa-eraser" aria-hidden="true"></i>
+        <span class="text-nowrap">Limpiar filtros</span>
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <form id="filtros" class="collapse show pt-3">
+      <div class="row g-3">
+        <!-- Empresa -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-building"></i> Empresa
+          </label>
+          <select name="empresa"
+                  class="form-select"
+                  hx-get="{% url 'adminpanel:mis_investigaciones_partial' %}"
+                  hx-target="#tabla-investigaciones"
+                  hx-swap="outerHTML"
+                  hx-include="#filtros *"
+                  hx-trigger="change">
+            <option value="">Todas las empresas</option>
+            {% for e in empresas %}
+              <option value="{{ e.empresa_id }}"
+                      {% if sel_empresa|default:'' == e.empresa_id|stringformat:"s" %}selected{% endif %}>
+                {{ e.empresa_sel }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Mes -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-calendar-days"></i> Mes
+          </label>
+          <select name="mes"
+                  class="form-select"
+                  hx-get="{% url 'adminpanel:mis_investigaciones_partial' %}"
+                  hx-target="#tabla-investigaciones"
+                  hx-swap="outerHTML"
+                  hx-include="#filtros *"
+                  hx-trigger="change">
+            <option value="">Todos los meses</option>
+            {% for num, nombre in meses %}
+              <option value="{{ num }}"
+                      {% if sel_mes|default:'' == num|stringformat:"s" %}selected{% endif %}>
+                {{ nombre }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Trabajador -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user"></i> Trabajador
+          </label>
+          <select name="trabajador"
+                  class="form-select"
+                  hx-get="{% url 'adminpanel:mis_investigaciones_partial' %}"
+                  hx-target="#tabla-investigaciones"
+                  hx-swap="outerHTML"
+                  hx-include="#filtros *"
+                  hx-trigger="change">
+            <option value="">Todos los trabajadores</option>
+            {% for t in trabajadores %}
+              <option value="{{ t.trabajador_id }}"
+                      {% if sel_trabajador|default:'' == t.trabajador_id|stringformat:"s" %}selected{% endif %}>
+                {{ t.nombre_trabajador }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Investigador -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-tie"></i> Investigador
+          </label>
+          <select name="investigador"
+                  class="form-select"
+                  hx-get="{% url 'adminpanel:mis_investigaciones_partial' %}"
+                  hx-target="#tabla-investigaciones"
+                  hx-swap="outerHTML"
+                  hx-include="#filtros *"
+                  hx-trigger="change">
+            <option value="">Todos los investigadores</option>
+            {% for u in investigadores %}
+              <option value="{{ u.id }}"
+                      {% if sel_investigador|default:'' == u.id|stringformat:"s" %}selected{% endif %}>
+                {{ u.get_full_name|default:u.username }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Contenedor HTMX (se carga en el primer render) -->
+<div id="tabla-investigaciones"
+     class="mt-3"
+     hx-get="{% url 'adminpanel:mis_investigaciones_partial' %}"
+     hx-trigger="load"
+     hx-include="#filtros *"
+     hx-swap="outerHTML">
+  <div class="card text-center py-5 bg-white border">
+    <div class="card-body text-muted">Cargando…</div>
+  </div>
+</div>
+</div>
+{% endblock %}

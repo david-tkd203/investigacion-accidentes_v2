@@ -1,0 +1,93 @@
+{% comment %}
+Se recomienda que la vista anote:
+.annotate(codigo_accidente_db=F("codigo_accidente"))
+Para evitar colisión con un método/property homónimo.
+{% endcomment %}
+
+{% if page_obj.object_list %}
+  <div class="text-muted small mb-2">
+    Total: {{ paginator.count }} caso{{ paginator.count|pluralize:"s" }}
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light sticky-top">
+        <tr>
+          <th scope="col">Trabajador</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Empresa</th>
+          <th scope="col">Centro</th>
+          <th scope="col">Asignado(a)</th>  {# ⬅️ NUEVA COLUMNA #}
+          <th scope="col">Código</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Lesión</th>
+          <th scope="col" class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in page_obj.object_list %}
+          <tr>
+            <td>{{ a.trabajador.nombre_trabajador|default:"—" }}</td>
+            <td>
+              {% if a.fecha_accidente %}<time datetime="{{ a.fecha_accidente|date:'Y-m-d' }}">{{ a.fecha_accidente|date:"Y-m-d" }}</time>{% else %}—{% endif %}
+            </td>
+            <td>{{ a.empresa.empresa_sel|default:"—" }}</td>
+            <td>{{ a.centro.nombre_local|default:"—" }}</td>
+
+            {# ⬅️ CELDA NUEVA: nombre y apellido del usuario asignado #}
+            <td>
+              {% with u=a.usuario_asignado %}
+                {% if u %}
+                  {% if u.first_name or u.last_name %}
+                    {{ u.first_name }}{% if u.last_name %} {{ u.last_name }}{% endif %}
+                  {% elif u.nombre %}
+                    {{ u.nombre }}{% if u.apepat %} {{ u.apepat }}{% endif %}{% if u.apemat %} {{ u.apemat }}{% endif %}
+                  {% else %}
+                    — 
+                  {% endif %}
+                {% else %}
+                  — 
+                {% endif %}
+              {% endwith %}
+            </td>
+
+            <td><span class="code">{{ a.codigo_accidente_db|default:a.codigo_accidente }}</span></td>
+            <td>
+              {% if a.tipo_accidente %}<span class="chip chip--violet">{{ a.tipo_accidente }}</span>{% else %}—{% endif %}
+            </td>
+            <td>
+              {% if a.naturaleza_lesion %}<span class="chip chip--pink">{{ a.naturaleza_lesion }}</span>{% else %}—{% endif %}
+            </td>
+            <td class="text-end">
+              {% url 'accidentes:empresa' a.codigo_accidente as det_url %}
+              <a class="btn btn-sm btn-ist" href="{{ det_url }}" aria-label="Abrir {{ a.codigo_accidente }}">Abrir</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
+    {% if prev_url %}
+      <button class="btn btn-outline-ist"
+              hx-get="{{ prev_url }}" hx-target="#results" hx-push-url="false">← Anterior</button>
+    {% else %}
+      <button class="btn btn-outline-ist" disabled>← Anterior</button>
+    {% endif %}
+
+    <span class="text-muted small">Página {{ page_obj.number }} / {{ paginator.num_pages }}</span>
+
+    {% if next_url %}
+      <button class="btn btn-outline-ist"
+              hx-get="{{ next_url }}" hx-target="#results" hx-push-url="false">Siguiente →</button>
+    {% else %}
+      <button class="btn btn-outline-ist" disabled>Siguiente →</button>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="empty">
+    <div class="empty__icon" aria-hidden="true">🗂️</div>
+    <div class="empty__txt">No tienes casos asignados.</div>
+  </div>
+{% endif %}

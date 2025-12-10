@@ -1,0 +1,521 @@
+{% extends "accidentes/base.html" %}
+{% load static %}
+
+{% block title %}Mis casos asignados · IST{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accidentes/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'accidentes/css/cards.css' %}">
+{{ block.super }}
+<style>
+  /* Estilos para el botón de filtros con toggle */
+  #filtrosToggle {
+    min-width: 140px;
+    transition: all 0.3s ease;
+  }
+  
+  #filtrosToggle:hover {
+    background-color: #f8f9fa;
+    border-color: #7A3DBD;
+    color: #7A3DBD;
+  }
+  
+  #filtrosToggle[aria-expanded="true"] {
+    background-color: #7A3DBD;
+    border-color: #7A3DBD;
+    color: white;
+  }
+  
+  #filtrosToggle[aria-expanded="true"]:hover {
+    background-color: #602795;
+    border-color: #602795;
+  }
+  
+  #filtrosToggle .when-open {
+    display: none;
+  }
+  
+  #filtrosToggle .when-closed {
+    display: inline;
+  }
+  
+  #filtrosToggle[aria-expanded="true"] .when-open {
+    display: inline;
+  }
+  
+  #filtrosToggle[aria-expanded="true"] .when-closed {
+    display: none;
+  }
+  
+  /* Animación suave para el collapse */
+  #filtros-avanzados {
+    transition: height 0.3s ease;
+  }
+  
+  /* Mejora visual del input de búsqueda */
+  #search-general:focus {
+    border-color: #7A3DBD;
+    box-shadow: 0 0 0 0.2rem rgba(122, 61, 189, 0.25);
+  }
+  
+  .input-group-text {
+    border-right: 0;
+  }
+  
+  #search-general {
+    border-left: 0;
+  }
+  
+  #search-general:focus + .input-group-text {
+    border-color: #7A3DBD;
+  }
+  
+  /* Estilo para los labels con iconos */
+  .form-label i {
+    color: #7A3DBD;
+    width: 16px;
+    text-align: center;
+  }
+  
+  /* Botón limpiar con hover */
+  #btn-limpiar:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+  }
+  
+  /* Card con shadow mejorado */
+  .card.shadow-sm {
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.075) !important;
+  }
+  
+  /* Checkboxes de columnas de búsqueda */
+  .form-check-inline {
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-check-input:checked {
+    background-color: #7A3DBD;
+    border-color: #7A3DBD;
+  }
+  
+  .form-check-input:focus {
+    border-color: #7A3DBD;
+    box-shadow: 0 0 0 0.2rem rgba(122, 61, 189, 0.25);
+  }
+  
+  .form-check-label {
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .form-check-label i {
+    color: #7A3DBD;
+    margin-right: 0.25rem;
+  }
+  
+  #btn-toggle-all {
+    color: #6c757d;
+  }
+  
+  #btn-toggle-all:hover {
+    color: #7A3DBD;
+  }
+  
+  /* Responsive: en móviles, botones más pequeños */
+  @media (max-width: 768px) {
+    #filtrosToggle {
+      min-width: auto;
+      width: 100%;
+    }
+    
+    #filtrosToggle .when-open,
+    #filtrosToggle .when-closed {
+      display: inline !important;
+    }
+    
+    #filtrosToggle[aria-expanded="true"] .when-open {
+      font-weight: 600;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block page_title %}Mis casos asignados{% endblock %}
+
+{% block content %}
+
+<!-- Banda estilo IST con datos del usuario -->
+<div class="card border-0 mb-3 ist-hero">
+  <div class="card-body py-4">
+    <h2 class="text-white mb-2">Mis Casos Asignados</h2>
+
+    <div class="d-flex flex-wrap align-items-center gap-2 text-white-50">
+      <!-- Nombre -->
+      <span>
+        Hola,
+        <strong class="text-white">
+          {% if header_user.first_name or header_user.last_name %}
+            {{ header_user.first_name }} {{ header_user.last_name }}
+          {% elif request.user.first_name or request.user.last_name %}
+            {{ request.user.first_name }} {{ request.user.last_name }}
+          {% else %}
+            {{ request.user.username }}
+          {% endif %}
+        </strong>
+      </span>
+      <!-- Rol -->
+      {% if header_user.rol %}
+        <span class="ms-1">
+          ·
+          <span class="badge rounded-pill bg-opacity-75" style="background:#7A3DBD;">
+            Rol: {{ header_user.rol }}
+          </span>
+        </span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Filtros y Buscador -->
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <!-- Buscador principal y botones de control -->
+    <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 mb-3">
+      <div class="flex-grow-1">
+        <div class="input-group">
+          <span class="input-group-text bg-white">
+            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+          </span>
+          <input type="text" id="search-general" class="form-control"
+                 placeholder="Buscar por trabajador, código, empresa, centro, asignado, tipo o lesión...">
+        </div>
+      </div>
+      
+      <button
+        id="filtrosToggle"
+        class="btn btn-outline-secondary d-flex align-items-center justify-content-between"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#filtros-avanzados"
+        aria-expanded="false"
+        aria-controls="filtros-avanzados">
+        <span class="d-inline-flex align-items-center gap-2">
+          <i class="fa-solid fa-filter"></i>
+          <span>Filtros</span>
+        </span>
+        <span class="ms-3 small">
+          <span class="when-open">Ocultar</span>
+          <span class="when-closed">Mostrar</span>
+        </span>
+      </button>
+
+      <button type="button" class="btn btn-outline-secondary" id="btn-limpiar" title="Limpiar todos los filtros">
+        <i class="fa-solid fa-eraser" aria-hidden="true"></i>
+        <span class="d-none d-md-inline ms-1">Limpiar</span>
+      </button>
+    </div>
+
+    <!-- Opciones de búsqueda por columna -->
+    <div class="mb-3">
+      <small class="text-muted d-block mb-2">
+        <i class="fa-solid fa-sliders"></i>
+        <strong>Selecciona las columnas donde buscar:</strong> Marca/desmarca para incluir o excluir columnas del buscador
+      </small>
+      <div class="d-flex flex-wrap gap-2">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input search-column" type="checkbox" id="search-trabajador" value="trabajador" checked>
+          <label class="form-check-label small" for="search-trabajador">
+            <i class="fa-solid fa-user"></i> Nombre Trabajador
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input search-column" type="checkbox" id="search-codigo" value="codigo" checked>
+          <label class="form-check-label small" for="search-codigo">
+            <i class="fa-solid fa-hashtag"></i> Código Accidente
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input search-column" type="checkbox" id="search-centro" value="centro" checked>
+          <label class="form-check-label small" for="search-centro">
+            <i class="fa-solid fa-map-marker-alt"></i> Centro Trabajo
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input search-column" type="checkbox" id="search-asignado" value="asignado" checked>
+          <label class="form-check-label small" for="search-asignado">
+            <i class="fa-solid fa-user-tie"></i> Investigador
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input search-column" type="checkbox" id="search-tipo" value="tipo" checked>
+          <label class="form-check-label small" for="search-tipo">
+            <i class="fa-solid fa-triangle-exclamation"></i> Tipo Accidente
+          </label>
+        </div>
+        <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 ms-2" id="btn-toggle-all">
+          <small><i class="fa-solid fa-check-double"></i> Seleccionar todo</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros avanzados (colapsables) -->
+    <form id="filtros-avanzados" class="collapse">
+      <hr class="my-3">
+      <div class="row g-3">
+        <!-- Tipo de accidente -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation"></i> Tipo de accidente
+          </label>
+          <select id="filter-tipo" class="form-select">
+            <option value="">Todos los tipos</option>
+            {% for tipo_value, tipo_label in tipos_accidente %}
+              <option value="{{ tipo_value }}">{{ tipo_label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Empresa -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-building"></i> Empresa
+          </label>
+          <select id="filter-empresa" class="form-select">
+            <option value="">Todas las empresas</option>
+            {% for e in empresas %}
+              <option value="{{ e.empresa_id }}">{{ e.empresa_sel }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Investigador -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-tie"></i> Investigador
+          </label>
+          <select id="filter-investigador" class="form-select">
+            <option value="">Todos los investigadores</option>
+            {% for u in investigadores %}
+              <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Fecha desde -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-calendar-days"></i> Fecha desde
+          </label>
+          <input type="date" id="filter-fecha-desde" class="form-control">
+        </div>
+
+        <!-- Fecha hasta -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-calendar-days"></i> Fecha hasta
+          </label>
+          <input type="date" id="filter-fecha-hasta" class="form-control">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Listado -->
+<div class="card border-0">
+  <div class="card-body">
+    <div id="results"
+         hx-get="{% url 'accidentes:home-assigned-partial' %}"
+         hx-trigger="load"
+         hx-target="#results"
+         hx-swap="innerHTML"
+         hx-indicator=".htmx-indicator">
+      <!-- Mensaje de carga -->
+      <div class="text-center py-5 htmx-indicator">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="text-muted mt-3">Cargando tus casos asignados...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+
+<script>
+(function() {
+  let searchTimeout;
+  
+  // Función para obtener las columnas seleccionadas
+  function getSelectedColumns() {
+    const checkboxes = document.querySelectorAll('.search-column:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+  }
+  
+  // Función para obtener los parámetros actuales de filtros
+  function getFilterParams() {
+    const searchGeneral = document.getElementById('search-general').value.trim();
+    const selectedColumns = getSelectedColumns();
+    const tipo = document.getElementById('filter-tipo').value;
+    const empresa = document.getElementById('filter-empresa').value;
+    const investigador = document.getElementById('filter-investigador').value;
+    const fechaDesde = document.getElementById('filter-fecha-desde').value;
+    const fechaHasta = document.getElementById('filter-fecha-hasta').value;
+    
+    const params = new URLSearchParams();
+    if (searchGeneral) params.append('q', searchGeneral);
+    if (selectedColumns.length > 0) params.append('columns', selectedColumns.join(','));
+    if (tipo) params.append('tipo_accidente', tipo);
+    if (empresa) params.append('empresa', empresa);
+    if (investigador) params.append('investigador', investigador);
+    if (fechaDesde) params.append('fecha_desde', fechaDesde);
+    if (fechaHasta) params.append('fecha_hasta', fechaHasta);
+    // No enviamos 'view' - dejamos que el backend lo detecte con User-Agent
+    
+    return params.toString();
+  }
+  
+  // Función para recargar resultados
+  function reloadResults() {
+    const params = getFilterParams();
+    const url = '{% url "accidentes:home-assigned-partial" %}?' + params;
+    
+    if (typeof htmx === 'undefined') {
+      console.error('HTMX no está disponible');
+      return;
+    }
+    
+    htmx.ajax('GET', url, {
+      target: '#results',
+      swap: 'innerHTML'
+    });
+  }
+  
+  // Inicializar cuando HTMX esté listo
+  function initializeFilters() {
+    const searchGeneral = document.getElementById('search-general');
+    const tipoSelect = document.getElementById('filter-tipo');
+    const empresaSelect = document.getElementById('filter-empresa');
+    const investigadorSelect = document.getElementById('filter-investigador');
+    const fechaDesde = document.getElementById('filter-fecha-desde');
+    const fechaHasta = document.getElementById('filter-fecha-hasta');
+    const btnLimpiar = document.getElementById('btn-limpiar');
+    const columnCheckboxes = document.querySelectorAll('.search-column');
+    
+    // Búsqueda general con delay
+    if (searchGeneral) {
+      searchGeneral.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(reloadResults, 500);
+      });
+    }
+    
+    // Checkboxes de columnas
+    columnCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        if (searchGeneral && searchGeneral.value.trim()) {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(reloadResults, 300);
+        }
+      });
+    });
+    
+    // Botón toggle todos/ninguno
+    const btnToggleAll = document.getElementById('btn-toggle-all');
+    if (btnToggleAll) {
+      btnToggleAll.addEventListener('click', function() {
+        const allChecked = Array.from(columnCheckboxes).every(cb => cb.checked);
+        columnCheckboxes.forEach(cb => cb.checked = !allChecked);
+        
+        const text = this.querySelector('small');
+        if (allChecked) {
+          text.innerHTML = '<i class="fa-solid fa-square"></i> Seleccionar todo';
+        } else {
+          text.innerHTML = '<i class="fa-solid fa-check-double"></i> Seleccionar todo';
+        }
+        
+        if (searchGeneral && searchGeneral.value.trim()) {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(reloadResults, 300);
+        }
+      });
+    }
+    
+    // Selects y fechas
+    if (tipoSelect) {
+      tipoSelect.addEventListener('change', reloadResults);
+    }
+    
+    if (empresaSelect) {
+      empresaSelect.addEventListener('change', reloadResults);
+    }
+    
+    if (investigadorSelect) {
+      investigadorSelect.addEventListener('change', reloadResults);
+    }
+    
+    if (fechaDesde) {
+      fechaDesde.addEventListener('change', reloadResults);
+    }
+    
+    if (fechaHasta) {
+      fechaHasta.addEventListener('change', reloadResults);
+    }
+    
+    // Limpiar
+    if (btnLimpiar) {
+      btnLimpiar.addEventListener('click', function() {
+        if (searchGeneral) searchGeneral.value = '';
+        if (tipoSelect) tipoSelect.value = '';
+        if (empresaSelect) empresaSelect.value = '';
+        if (investigadorSelect) investigadorSelect.value = '';
+        if (fechaDesde) fechaDesde.value = '';
+        if (fechaHasta) fechaHasta.value = '';
+        reloadResults();
+      });
+    }
+    
+    // Collapse de filtros
+    const filtrosToggle = document.getElementById('filtrosToggle');
+    const filtrosCollapse = document.getElementById('filtros-avanzados');
+    if (filtrosToggle && filtrosCollapse) {
+      filtrosCollapse.addEventListener('show.bs.collapse', function() {
+        filtrosToggle.setAttribute('aria-expanded', 'true');
+      });
+      filtrosCollapse.addEventListener('hide.bs.collapse', function() {
+        filtrosToggle.setAttribute('aria-expanded', 'false');
+      });
+    }
+  }
+  
+  // Esperar a que el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initializeFilters, 100);
+    });
+  } else {
+    setTimeout(initializeFilters, 100);
+  }
+  
+  // Responsive: cambiar vista al cambiar tamaño
+  const mql = window.matchMedia('(max-width: 768px)');
+  function handleViewChange() {
+    if (document.getElementById('search-general')) {
+      setTimeout(reloadResults, 100);
+    }
+  }
+  
+  if (mql.addEventListener) {
+    mql.addEventListener('change', handleViewChange);
+  } else if (mql.addListener) {
+    mql.addListener(handleViewChange);
+  }
+})();
+</script>
+{% endblock %}

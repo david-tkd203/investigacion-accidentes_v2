@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+mysql/*
+protected_media/documentos/*
+protected_media/informes/*
+# Credenciales sensibles
+/accidentes/Credentials/
+/accidentes/setting/data/*
+/Datos_negocio.sql
+# Entorno de variables
+/.env
+/.env.dev
+
+# Editor temp files (opcional)
+/.vscode/
+/*.swp

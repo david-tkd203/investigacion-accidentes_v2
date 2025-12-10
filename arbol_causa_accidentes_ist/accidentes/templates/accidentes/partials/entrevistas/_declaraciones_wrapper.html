@@ -1,0 +1,277 @@
+{# accidentes/templates/accidentes/partials/entrevistas/_declaraciones_wrapper.html #}
+
+<div id="declaraciones-wrapper" {% if oob %}hx-swap-oob="outerHTML"{% endif %}>
+  {% if not has_generated %}
+    <div class="row">
+      <div class="col-12 col-md-8 col-lg-6 mx-auto">
+        <div class="alert alert-info d-flex align-items-center gap-2 mb-3" role="alert">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <div>
+            Aún no hay preguntas generadas. Presione el botón para generar de manera asistida
+            preguntas para el accidentado, testigos y supervisión/jefatura.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form
+      method="post"
+      action="{% url 'accidentes:ia_declaraciones' codigo %}"
+      style="text-align:center; margin:2rem 0;"
+
+      {# === HTMX === #}
+      hx-post="{% url 'accidentes:ia_declaraciones' codigo %}"
+      hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+      hx-target="#declaraciones-wrapper"
+      hx-swap="outerHTML"
+      hx-indicator="#relato-indicator"
+    >
+      {% csrf_token %}
+      <input type="hidden" name="action" value="generate">
+      <div class="row">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-4 mx-auto">
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-guardar btn-primary-custom btn-lg">
+              Generar preguntas con IA
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+    {# OOB: ocultar la barra sticky mientras no hay preguntas #}
+    <div id="save-actions"
+        hx-swap-oob="outerHTML"
+        class="save-actions mt-3 d-none"
+        role="region"
+        aria-label="Acciones de guardado masivo"></div>
+
+
+
+  {% else %}
+
+    {# ======== TABS ======== #}
+    <ul class="nav nav-pills nav-pills-custom justify-content-center mb-5" id="categoryTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active d-flex align-items-center"
+                id="accidentado-tab" data-bs-toggle="pill" data-bs-target="#accidentado"
+                type="button" role="tab" aria-controls="accidentado" aria-selected="true">
+          <i class="fa-solid fa-user"></i>
+          <span class="d-none d-sm-inline">Accidentado</span>
+          <span class="d-sm-none">Accidentado</span>
+          <span class="category-badge" id="accidentado-count">{{ count_accidentado|default:0 }}</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link d-flex align-items-center"
+                id="testigo-tab" data-bs-toggle="pill" data-bs-target="#testigo"
+                type="button" role="tab" aria-controls="testigo" aria-selected="false">
+          <i class="fa-solid fa-eye"></i>
+          <span class="d-none d-sm-inline">Testigo</span>
+          <span class="d-sm-none">Testigo</span>
+          <span class="category-badge" id="testigo-count">{{ count_testigo|default:0 }}</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link d-flex align-items-center"
+                id="supervision-tab" data-bs-toggle="pill" data-bs-target="#supervision"
+                type="button" role="tab" aria-controls="supervision" aria-selected="false">
+          <i class="fa-solid fa-clipboard-check"></i>
+          <span class="d-none d-sm-inline">Supervisión</span>
+          <span class="d-sm-none">Supervisor</span>
+          <span class="category-badge" id="supervision-count">{{ count_supervision|default:0 }}</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="categoryTabContent">
+      {# === ACCIDENTADO === #}
+      <div class="tab-pane fade show active" id="accidentado" role="tabpanel" aria-labelledby="accidentado-tab">
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center mb-4 gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-user fs-4" style="color: var(--primary-color);"></i>
+            <h2 class="h3 mb-0 text-dark">Accidentado</h2>
+            <button class="btn btn-primary-custom btn-sm d-inline-flex align-items-center gap-1 px-2 py-1 w-sm-auto ms-2"
+                    data-bs-toggle="modal" data-bs-target="#addQuestionModal"
+                    onclick="setCurrentCategory('accidentado')">
+              <i class="fa-solid fa-plus"></i>
+              <span class="d-none d-sm-inline">Agregar pregunta</span>
+              <span class="d-sm-none">Agregar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="grid-accidentado">
+          {% for slot in qs_accidentado %}
+            <div class="col">
+              {% include "accidentes/partials/entrevistas/_pregunta_card.html" with slot=slot categoria='accidentado' codigo=codigo idx=forloop.counter %}
+            </div>
+          {% empty %}
+            <div class="col-12"><div class="empty-state">Sin preguntas.</div></div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {# === TESTIGO === #}
+      <div class="tab-pane fade" id="testigo" role="tabpanel" aria-labelledby="testigo-tab">
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center mb-4 gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-eye fs-4 text-primary"></i>
+            <h2 class="h3 mb-0 text-dark">Testigo</h2>
+            <button class="btn btn-primary-custom btn-sm d-inline-flex align-items-center gap-1 px-2 py-1 w-sm-auto ms-2"
+                    data-bs-toggle="modal" data-bs-target="#addQuestionModal"
+                    onclick="setCurrentCategory('testigo')">
+              <i class="fa-solid fa-plus"></i>
+              <span class="d-none d-sm-inline">Agregar pregunta</span>
+              <span class="d-sm-none">Agregar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="grid-testigo">
+          {% for slot in qs_testigo %}
+            <div class="col">
+              {% include "accidentes/partials/entrevistas/_pregunta_card.html" with slot=slot categoria='testigo' codigo=codigo idx=forloop.counter %}
+            </div>
+          {% empty %}
+            <div class="col-12"><div class="empty-state">Sin preguntas.</div></div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {# === SUPERVISIÓN === #}
+      <div class="tab-pane fade" id="supervision" role="tabpanel" aria-labelledby="supervision-tab">
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center mb-4 gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-clipboard-check fs-4 text-primary"></i>
+            <h2 class="h3 mb-0 text-dark">Supervisión</h2>
+            <button class="btn btn-primary-custom btn-sm d-inline-flex align-items-center gap-1 px-2 py-1 w-sm-auto ms-2"
+                    data-bs-toggle="modal" data-bs-target="#addQuestionModal"
+                    onclick="setCurrentCategory('supervision')">
+              <i class="fa-solid fa-plus"></i>
+              <span class="d-none d-sm-inline">Agregar pregunta</span>
+              <span class="d-sm-none">Agregar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="grid-supervision">
+          {% for slot in qs_supervision %}
+            <div class="col">
+              {% include "accidentes/partials/entrevistas/_pregunta_card.html" with slot=slot categoria='supervision' codigo=codigo idx=forloop.counter %}
+            </div>
+          {% empty %}
+            <div class="col-12"><div class="empty-state">Sin preguntas.</div></div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    {# === MODAL: Agregar pregunta === #}
+    <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <form
+          id="add-form"
+          method="post"
+          action="{% url 'accidentes:ia_declaraciones' codigo %}"
+
+          {# === HTMX para crear nueva pregunta sin recargar === #}
+          hx-post="{% url 'accidentes:ia_declaraciones' codigo %}"
+          hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+          hx-swap="none"    {# no reemplazamos el modal; la vista puede devolver OOB si quieres actualizar contadores/grids #}
+          hx-indicator="#relato-indicator"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_new">
+          <input type="hidden" name="categoria" id="add-categoria" value="">
+          <input type="hidden" name="anchor" id="add-anchor" value="">
+
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                Agregar pregunta – <span id="addModalTitleCat">Categoría</span>
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+              {# --- NUEVO: aviso y botón de guardar todas --- #}
+              <div class="alert alert-warning d-flex align-items-start gap-2 mb-3" role="alert">
+                <i class="fa-solid fa-triangle-exclamation mt-1" aria-hidden="true"></i>
+                <div>
+                  <strong>Antes de generar una pregunta</strong> asegura de guardar tus respuestas
+                  si estas no fueron registradas.
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <button
+                  id="btn-save-all-modal"
+                  type="button"
+                  class="btn btn-primary-custom d-inline-flex align-items-center gap-2 px-3 shadow-sm"
+                  hx-post="{% url 'accidentes:ia_declaraciones' codigo %}"
+                  hx-vals='{"action":"save_bulk"}'
+                  hx-include="#grid-accidentado form, #grid-testigo form, #grid-supervision form"
+                  hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+                  hx-swap="none"
+                  hx-indicator="#save-all-indicator-modal"
+                  hx-disabled-elt="this"
+                  title="Guardar en un paso (Ctrl+S)">
+                  <span id="save-all-indicator-modal" class="htmx-indicator spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+                  <span>Guardar todas las respuestas</span>
+                </button>
+              </div>
+              {# --- FIN NUEVO --- #}
+              <div class="mb-3">
+                <label class="form-label">Pregunta</label>
+                <textarea name="new_pregunta" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Objetivo</label>
+                <textarea name="new_objetivo" class="form-control" rows="3" required></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary-custom">Crear</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  {# OOB: mostrar/actualizar la barra sticky cuando ya hay preguntas #}
+  <div id="save-actions"
+      hx-swap-oob="outerHTML"
+      class="save-actions mt-3"
+      role="region"
+      aria-label="Acciones de guardado masivo">
+    <div class="container-xxl px-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <small id="save-hint" class="text-muted mb-0">
+        Guardará las respuestas escritas en <strong>Accidentado</strong>, <strong>Testigos</strong> y <strong>Supervisión</strong>.
+      </small>
+      <button
+        id="btn-save-all"
+        type="button"
+        class="btn btn-primary-custom d-inline-flex align-items-center gap-2 px-3 shadow-sm"
+        hx-post="{% url 'accidentes:ia_declaraciones' codigo %}"
+        hx-vals='{"action":"save_bulk"}'
+        hx-include="#grid-accidentado form, #grid-testigo form, #grid-supervision form"
+        hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+        hx-swap="none"
+        hx-indicator="#save-all-indicator"
+        hx-disabled-elt="this"
+        title="Guardar en un paso (Ctrl+S)">
+        <span id="save-all-indicator" class="htmx-indicator spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+        <span>Guardar todas las respuestas</span>
+      </button>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

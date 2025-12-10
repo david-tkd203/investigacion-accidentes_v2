@@ -1,0 +1,168 @@
+/* Barra de progreso de caso (IST) */
+.case-progress {
+    --ist: #51287A;
+    --ist-dark: #3E1F5B;
+    --track: #EEEAF5;
+    --ok: #23C16B;
+    --text: #333;
+    --muted: #6b7280;
+
+    background: #fff;
+    border: 1px solid #E8E6EE;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.05);
+    margin-bottom: 14px;
+}
+
+.case-progress .cp-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.case-progress .cp-title {
+    font-weight: 700;
+    color: var(--ist);
+}
+
+.case-progress .cp-meta {
+    color: var(--muted);
+    font-size: .95rem;
+}
+
+.case-progress .cp-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #F5F1FB;
+    color: var(--ist);
+    border: 1px solid #E6DDF5;
+}
+
+.case-progress .cp-bar-outer {
+    height: 10px;
+    background: var(--track);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.case-progress .cp-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ist), var(--ist-dark));
+    width: 0%;
+    transition: width .35s ease;
+}
+
+.case-progress .cp-steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(120px, 1fr));
+    gap: 6px 10px;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.case-progress .cp-step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.case-progress .cp-step .cp-step-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.case-progress .cp-step .cp-step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #c9c3d9;
+    border: 2px solid #e8e4f1;
+    flex-shrink: 0;
+}
+
+.case-progress .cp-step.done .cp-step-dot {
+    background: var(--ok);
+    border-color: #bff1d2;
+}
+
+.case-progress .cp-step.active .cp-step-dot {
+    background: var(--ist);
+    border-color: #e6ddf5;
+}
+
+.case-progress .cp-step .cp-step-label {
+    font-size: .95rem;
+    line-height: 1.2;
+}
+
+@media (max-width: 920px) {
+    .case-progress .cp-steps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Barra de progreso de caso (estilo IST, aislada) */
+.case-progress{
+    --ist:#51287A;--ist-dark:#3E1F5B;--track:#EEEAF5;--ok:#23C16B;--muted:#6b7280;--border:#E8E6EE;
+    background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin:8px 0 16px;
+    box-shadow:0 4px 12px rgba(0,0,0,.05)
+}
+.case-progress .cp-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.case-progress .cp-title{font-weight:700;color:var(--ist)}
+.case-progress .cp-title .cp-code{font-weight:600;color:#7A3DBD}
+.case-progress .cp-meta{color:var(--muted);font-size:.95rem}
+.case-progress .cp-chip{display:inline-block;padding:2px 8px;border-radius:999px;background:#F5F1FB;color:var(--ist);border:1px solid #E6DDF5;text-decoration:none}
+.case-progress .cp-bar-outer{height:10px;background:var(--track);border-radius:999px;overflow:hidden}
+.case-progress .cp-bar-inner{height:100%;background:linear-gradient(90deg,var(--ist),var(--ist-dark));width:0;transition:width .35s ease}
+.case-progress .cp-steps{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:6px 10px;margin:12px 0 0;padding:0}
+.case-progress .cp-step{display:flex;align-items:center;gap:8px}
+.case-progress .cp-step .cp-step-link{text-decoration:none;color:#333;display:inline-flex;align-items:center;gap:8px}
+.case-progress .cp-step .cp-step-dot{width:10px;height:10px;border-radius:999px;background:#c9c3d9;border:2px solid #e8e4f1;flex-shrink:0}
+.case-progress .cp-step.done .cp-step-dot{background:var(--ok);border-color:#bff1d2}
+.case-progress .cp-step .cp-step-label{font-size:.95rem;line-height:1.2}
+@media (max-width:920px){.case-progress .cp-steps{grid-template-columns:repeat(2,1fr)}}
+
+.cp-bar-outer {
+    --cp-progress: 0%;
+    background: #eee;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    position: relative;
+}
+.cp-bar-inner {
+    height: 100%;
+    width: var(--cp-progress, 0%);
+    background: #51287A;            /* morado IST */
+    transition: width .35s ease;
+}
+
+/* ==== Color y comportamiento de la barra de progreso ==== */
+#case-progress .cp-bar-outer{
+    --cp-height: 12px;
+    --cp-radius: 999px;
+    --cp-track: #E9ECEF;         /* pista gris clara */
+    background: var(--cp-track);
+    height: var(--cp-height);
+    border-radius: var(--cp-radius);
+    position: relative;
+    overflow: hidden;
+}
+
+#case-progress .cp-bar-inner{
+    height: 100%;
+    width: var(--cp-progress, 0%);   /* se alimenta desde el template */
+    background: linear-gradient(90deg,#2ECC71 0%,#28A745 55%,#1E7E34 100%); /* VERDE */
+    border-radius: inherit;
+    transition: width .35s ease;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.03);
+}

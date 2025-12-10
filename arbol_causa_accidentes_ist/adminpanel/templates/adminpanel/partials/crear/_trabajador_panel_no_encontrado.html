@@ -1,0 +1,16 @@
+<div class="alert alert-warning d-flex align-items-center justify-content-between">
+  <div>
+    No se encontró trabajador con RUT <strong>{{ rut }}</strong>.
+  </div>
+  <button
+    type="button"
+    class="btn btn-sm btn-outline-dark"
+    data-bs-toggle="modal"
+    data-bs-target="#modalCrearTrabajador"
+    hx-get="{% url 'adminpanel:trabajador_modal' %}?rut={{ rut|urlencode }}{% if empresa_id %}&empresa={{ empresa_id }}{% endif %}"
+    hx-target="#modalCrearTrabajador .modal-content"
+    hx-swap="innerHTML"
+  >
+    Crear trabajador
+  </button>
+</div>

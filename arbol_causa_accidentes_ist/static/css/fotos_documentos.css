@@ -1,0 +1,309 @@
+/* accidentes/css/fotos_documentos.css */
+
+/* 1) Reset y base */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+    background: #f8f9fa;
+    color: #333;
+}
+
+/* 2) Contenedor principal */
+.main-content {
+    max-width: auto;   /* antes: 800px */
+    width: auto;          /* ocupa hasta 90% del viewport */
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* 3) Títulos decorativos */
+.main-content h1,
+.main-content h2 {
+    text-align: center;
+    color: #51287A;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    position: relative;
+}
+
+.main-content h1::after,
+.main-content h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: #51287A;
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+}
+
+/* 4) Mensajes */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.messages li {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+
+.messages li.success {
+    background: #e6f4ea;
+    color: #276749;
+}
+
+.messages li.warning {
+    background: #fff4e5;
+    color: #7b341e;
+}
+
+.messages li.error {
+    background: #fbeaea;
+    color: #9b2c2c;
+}
+
+/* 5) Separador */
+hr {
+    border: none;
+    height: 1px;
+    background: #e2d8f3;
+    margin: 2rem 0;
+}
+
+/* 6) Bloques de preguntas (document-box) */
+.document-box {
+    background: #fff;
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+
+    /* en lugar de height:360px; */
+    min-height: 360px;
+    height: auto;
+    box-sizing: border-box;
+    overflow: visible; 
+    padding-bottom: 2.5rem;
+}
+
+.document-box .btn-guardar {
+  margin-top: 1.5rem;      /* empuja el botón hacia abajo */
+}
+/* Contenido textual */
+.document-box p {
+    margin: 0.6rem 0;
+    line-height: 1.4;
+}
+
+.document-box p strong {
+    color: #3e1f5b;
+}
+
+.document-box p em {
+    display: block;
+    color: #555;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+/* 7) Formularios internos: apilados y con scroll si sobran campos */
+.document-box form {
+    overflow: visible !important;
+    height: auto !important;
+    
+}
+
+.document-box label {
+    font-weight: 500;
+    color: #444;
+}
+
+.document-box input[type="url"],
+.document-box input[type="file"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+}
+
+.document-box input:focus {
+    outline: none;
+    border-color: #51287A;
+}
+
+/* 8) Botón “Guardar” */
+.btn-guardar {
+    padding: 0.8rem 1.6rem;
+    background-color: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    align-self: flex-start;
+    transition: background-color 0.2s;
+}
+
+.btn-guardar:hover {
+    background-color: #3e1f5b;
+}
+
+/* 9) Lista de archivos subidos */
+.uploaded-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.uploaded-list li {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.uploaded-list a {
+    color: #51287A;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.uploaded-list a:hover {
+    text-decoration: underline;
+}
+
+.btn-guardar-small {
+    padding: 0.4rem 0.8rem;
+    background-color: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s;
+}
+
+.btn-guardar-small:hover {
+    background-color: #3e1f5b;
+}
+
+/* 10) Formulario libre de subida */
+.upload-form {
+    background: #fff;
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.upload-form label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: 500;
+    color: #444;
+}
+
+.upload-form input[type="file"],
+.upload-form input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+}
+
+/* 11) “Guardar todo y continuar” */
+.final-action {
+    clear: both;       /* quita cualquier float previo */
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.final-action .btn-guardar {
+    padding: 0.85rem 2rem;
+}
+
+/* 12) Responsive: alturas fluidas en móvil */
+@media (max-width: 600px) {
+    .document-box {
+        height: auto;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .upload-form {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .uploaded-list li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-guardar {
+        width: 100%;
+    }
+}
+
+/* Centrar el botón “Añadir documento” */
+#add-doc-btn {
+    display: block;
+    margin: 1rem auto; /* vertical 1rem, horizontal auto */
+}
+
+#free-upload-form {
+    background: #fff;
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+
+    display: flex;
+    flex-direction: column;
+
+    /* mismo alto mínimo que las tarjetas de preguntas */
+    min-height: 360px;
+    height: auto;
+    box-sizing: border-box;
+    overflow: visible; 
+    padding-bottom: 2.5rem;
+
+    /* ocupa todo el ancho disponible */
+    width: 55%;
+}
+
+#free-docs-container {
+    /* eliminamos el desplazamiento interno */
+    max-height: none !important;
+    overflow-y: visible !important;
+}
+

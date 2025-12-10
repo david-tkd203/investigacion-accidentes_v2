@@ -1,0 +1,149 @@
+/* accidentes/css/arbol.css */
+
+/* Wrapper */
+.arbol-wrapper {
+    max-width: 1000px;    /* un poco más ancho */
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Inter', sans-serif;
+}
+.arbol-wrapper h1 {
+    text-align: left;
+    color: #51287A;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* Mensajes */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+.messages li {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+.messages li.success { background: #e6f4ea; color: #276749; }
+.messages li.error   { background: #fbeaea; color: #9b2c2c; }
+.messages li.warning { background: #fff4e5; color: #7b341e; }
+
+/* Controles IA / Import */
+.arbol-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.btn-guardar,
+.btn-guardar-small {
+    background: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-guardar:hover,
+.btn-guardar-small:hover {
+    background: #3e1f5b;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+/* Gráfico */
+#graph {
+    margin-bottom: 0.5rem;   /* lo acercamos a los botones */
+}
+.graph-svg,
+.dot-code {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    overflow: auto;
+    width: 100%;            /* ocupa todo el ancho posible */
+    min-height: 600px;      /* altura mayor para ver todo el contenido */
+    box-sizing: border-box;
+}
+.dot-code {
+    white-space: pre-wrap;
+}
+
+/* Navegación */
+.arbol-navigation {
+    display: flex;
+    justify-content: center; /* los centra en el contenedor */
+    gap: 0.5rem;             /* espacio reducido entre ellos */
+    margin: 0.5rem 0 1.5rem; /* margen superior e inferior */
+}
+.nav-btn {
+    padding: 0.5rem 0.75rem; /* botones un poco más compactos */
+    background: #e2d8f3;
+    color: #51287A;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+.nav-btn:hover {
+    background: #d4c7e8;
+}
+
+/* Edición de nodos */
+.arbol-edit {
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 6px;
+    padding: 1rem;
+}
+.text-input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+.btn-eliminar {
+    background: #fbeaea;
+    color: #9b2c2c;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-eliminar:hover {
+    background: #f2d6d6;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .arbol-controls,
+    .arbol-navigation,
+    .button-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .text-input,
+    .btn-guardar,
+    .btn-guardar-small,
+    .btn-eliminar,
+    .nav-btn {
+        width: 100%;
+        text-align: center;
+    }
+}

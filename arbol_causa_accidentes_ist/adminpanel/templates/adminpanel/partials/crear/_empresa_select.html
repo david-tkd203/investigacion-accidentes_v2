@@ -1,0 +1,36 @@
+{# adminpanel/partials/crear/_empresa_select.html #}
+<label class="form-label">Empresa <span class="text-danger">*</span></label>
+
+<select
+  name="empresa"
+  id="id_empresa"
+  class="form-select"
+  required
+>
+  <option value="">— Selecciona empresa —</option>
+  {% for e in empresas %}
+    <option value="{{ e.pk }}" {% if sel_empresa|stringformat:'s' == e.pk|stringformat:'s' %}selected{% endif %}>
+      {{ e.empresa_sel }}
+    </option>
+  {% endfor %}
+</select>
+
+<input type="hidden" name="empresa" id="id_empresa_hidden" value="{{ sel_empresa|default:'' }}">
+
+<script>
+  (function() {
+    var sel = document.getElementById('id_empresa');
+    var hid = document.getElementById('id_empresa_hidden');
+    if (!sel || !hid) return;
+    // Sincroniza hidden al cargar y al cambiar
+    hid.value = sel.value || "";
+    sel.addEventListener('change', function () {
+      hid.value = sel.value || "";
+      // limpiar selección de usuario al cambiar empresa
+      var uhid = document.getElementById('id_usuario_asignado'); if (uhid) uhid.remove();
+      var upanel = document.getElementById('usuario-panel'); if (upanel) upanel.replaceChildren();
+      var ures = document.getElementById('usuario-resultados'); if (ures) ures.replaceChildren();
+      var chip = document.getElementById('usuario-seleccionado'); if (chip) { chip.textContent=''; chip.classList.add('d-none'); }
+    });
+  })();
+</script>

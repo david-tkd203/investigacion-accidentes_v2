@@ -1,0 +1,59 @@
+{# accidentes/templates/accidentes/includes/progress.html #}
+{% load static %}
+{% if progress %}
+<link rel="stylesheet" href="{% static 'accidentes/css/progress.css' %}">
+
+<div class="case-progress" id="case-progress">
+    <div class="cp-head">
+        <div class="cp-title">
+        Progreso del caso
+        {% if progress.codigo %}
+            · <span class="cp-code">{{ progress.codigo }}</span>
+        {% endif %}
+        </div>
+
+        <div class="cp-meta">
+        <strong>{{ progress.percent|default:0 }}%</strong> completado
+        {% if progress.next %}
+            · siguiente:
+            <a class="cp-chip" href="{{ progress.next.url }}">{{ progress.next.label }}</a>
+        {% elif progress.percent == 100 %}
+            · <span class="cp-chip">¡Listo!</span>
+        {% endif %}
+        </div>
+    </div>
+
+    {# >>> mueve el porcentaje a una variable CSS #}
+    <div class="cp-bar-outer"
+        style="--cp-progress: {{ progress.percent|default:0 }}%;"
+        role="progressbar"
+        aria-label="Progreso del caso{% if progress.codigo %} {{ progress.codigo }}{% endif %}"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="{{ progress.percent|default:0 }}">
+        <div class="cp-bar-inner"></div>
+    </div>
+
+    <ol class="cp-steps">
+        {% for s in progress.steps %}
+        <li class="cp-step {% if s.done %}done{% endif %} {% if active_key and active_key == s.key %}active{% endif %}">
+            {% if s.url %}
+            <a href="{{ s.url }}" class="cp-step-link" title="{{ s.label }}">
+                <span class="cp-step-dot"></span>
+                <span class="cp-step-label">{{ s.label }}</span>
+            </a>
+            {% else %}
+            <span class="cp-step-link" title="{{ s.label }}">
+                <span class="cp-step-dot"></span>
+                <span class="cp-step-label">{{ s.label }}</span>
+            </span>
+            {% endif %}
+        </li>
+        {% empty %}
+        <li class="cp-step">
+            <span class="cp-step-label">Sin pasos configurados</span>
+        </li>
+        {% endfor %}
+    </ol>
+</div>
+{% endif %}

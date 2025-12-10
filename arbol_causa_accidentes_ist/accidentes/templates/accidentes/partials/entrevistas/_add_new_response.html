@@ -1,0 +1,5 @@
+{% include "accidentes/partials/entrevistas/_grid_oob.html" %}
+{% include "accidentes/partials/entrevistas/_badges_oob.html" %}
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+    {% include "accidentes/notification.html" %}
+{% endif %}

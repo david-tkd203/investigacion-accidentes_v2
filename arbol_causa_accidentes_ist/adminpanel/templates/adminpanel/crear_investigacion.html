@@ -1,0 +1,291 @@
+{% extends "adminpanel/base_adminpanel.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Crear Nuevo Accidente{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="container-lg py-3 py-md-4">
+  <!-- Encabezado -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="tile-icon">
+      <i class="fas fa-exclamation-triangle text-white"></i>
+    </div>
+    <div>
+      <h1 class="h4 h3-md mb-1 text-dark fw-bold">Crear Nuevo Accidente</h1>
+      <p class="mb-0 text-muted">Registra un nuevo incidente laboral para investigación</p>
+    </div>
+  </div>
+
+  {# IMPORTANTE: no imprimir messages aquí (los consume el toast global del base) #}
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    {# ========= Información de la Empresa ========= #}
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-building card-title-icon"></i>
+          <div>
+            <h5 class="mb-0">Información de la Empresa</h5>
+            <small class="text-muted">Selecciona el holding y la empresa donde ocurrió el accidente</small>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          {# HOLDING #}
+          {% if form.holding.is_hidden %}
+            {{ form.holding }}
+          {% else %}
+            <div class="col-12 col-lg-6">
+              <label class="form-label">Holding <span class="text-danger">*</span></label>
+              <select
+                name="holding" id="id_holding"
+                class="form-select"
+                hx-get="{% url 'adminpanel:empresas_por_holding' %}"
+                hx-trigger="change"
+                hx-target="#empresa-select-wrapper"
+                hx-include="#id_holding, #id_empresa_hidden"
+                hx-indicator="#relato-indicator"
+                hx-disabled-elt="this"
+              >
+                <option value="">— Selecciona holding —</option>
+                {% for h in form.fields.holding.queryset %}
+                  <option value="{{ h.pk }}"
+                          {% if form.initial.holding == h.pk or form.holding.value == h.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ h.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if form.holding.errors %}<div class="text-danger small">{{ form.holding.errors }}</div>{% endif %}
+            </div>
+          {% endif %}
+
+          {# EMPRESA (encadenada; wrapper reemplazable por HTMX) #}
+          <div class="col-12 col-lg-6" id="empresa-select-wrapper">
+            <label class="form-label">Empresa <span class="text-danger">*</span></label>
+            {% if form.empresa.is_hidden %}
+              {{ form.empresa }}
+              <input type="text" class="form-control" value="{{ form.initial.empresa }}" hidden>
+            {% else %}
+              {{ form.empresa|add_class:"form-select" }}
+            {% endif %}
+            {% if form.empresa.errors %}<div class="text-danger small">{{ form.empresa.errors }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ========= Detalles del Accidente ========= #}
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-calendar-alt card-title-icon"></i>
+          <div>
+            <h5 class="mb-0">Detalles del Accidente</h5>
+            <small class="text-muted">Información básica sobre el incidente</small>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <label class="form-label">Fecha del Accidente <span class="text-danger">*</span></label>
+            {{ form.fecha_accidente|add_class:"form-control" }}
+            {% if form.fecha_accidente.errors %}<div class="text-danger small">{{ form.fecha_accidente.errors }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ========= Trabajador Involucrado ========= #}
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-user card-title-icon"></i>
+          <div>
+            <h5 class="mb-0">Trabajador Involucrado</h5>
+            <small class="text-muted">Selecciona el trabajador afectado o crea uno nuevo</small>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        {# Hidden real que envía el trabajador seleccionado #}
+        <input type="hidden" name="trabajador_id" id="id_trabajador_id" value="{{ form.trabajador_id.value|default:'' }}"/>
+
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-md-8">
+            <label class="form-label">Buscar por RUT <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Ej: 12.345.678-9"
+                id="rut_input"
+                name="rut"
+                hx-get="{% url 'adminpanel:trabajador_lookup' %}"
+                hx-trigger="keyup changed delay:400ms, search"
+                hx-include="#id_holding, #id_empresa, #rut_input"
+                hx-target="#trabajador-panel"
+                hx-indicator="#relato-indicator"
+              >
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                hx-get="{% url 'adminpanel:trabajador_lookup' %}"
+                hx-include="#id_holding, #id_empresa, #rut_input"
+                hx-target="#trabajador-panel"
+                hx-indicator="#relato-indicator"
+                hx-disabled-elt="this">
+                Buscar
+              </button>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label d-block">&nbsp;</label>
+            <button
+              type="button"
+              class="btn btn-outline-primary w-100"
+              data-bs-toggle="modal"
+              data-bs-target="#modalCrearTrabajador"
+              hx-get="{% url 'adminpanel:trabajador_modal' %}"
+              hx-include="#id_holding, #id_empresa"
+              hx-target="#modalCrearTrabajador .modal-content"
+              hx-swap="innerHTML"
+              hx-indicator="#relato-indicator"
+              hx-disabled-elt="this"
+            >
+              <i class="fas fa-user-plus me-2"></i> Nuevo trabajador
+            </button>
+          </div>
+        </div>
+
+        <div id="trabajador-panel" class="mt-3">
+          {% include "adminpanel/partials/crear/_trabajador_panel_vacio.html" %}
+        </div>
+      </div>
+    </div>
+
+    {# ========= Investigador Asignado ========= #}
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-user-tie card-title-icon"></i>
+          <div>
+            <h5 class="mb-0">Investigador Asignado</h5>
+            <small class="text-muted">Selecciona el investigador responsable del caso</small>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        {# Campo del form (hidden/select según config del form) #}
+        <div id="usuario-hidden-hook">
+          {{ form.usuario_asignado }}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <label class="form-label mb-0">Investigador <span class="text-danger">*</span></label>
+
+          {# ⬇️ Botón submit que envía action=asignarme #}
+          <button type="submit" name="action" value="asignarme" class="btn btn-link p-0 align-baseline">
+            Asígname
+          </button>
+        </div>
+
+        <div class="position-relative">
+          <input
+            type="text"
+            name="q"
+            class="form-control"
+            placeholder="Buscar usuario por nombre, usuario o email…"
+            hx-get="{% url 'adminpanel:usuario_lookup' %}"
+            hx-trigger="keyup changed delay:300ms"
+            hx-target="#usuario-resultados"
+            hx-include="#id_holding, #id_empresa, #id_empresa_hidden"
+            hx-indicator="#relato-indicator"
+          />
+          <div id="usuario-resultados" class="list-group position-absolute w-100" style="z-index:1000;"></div>
+        </div>
+
+        <div id="usuario-panel" class="mt-2"></div>
+
+        <div class="mt-2">
+          <span id="usuario-seleccionado" class="badge text-bg-light d-none"></span>
+        </div>
+      </div>
+    </div>
+
+    {# ========= Botones ========= #}
+    <div class="d-flex flex-column flex-sm-row gap-2 pt-2">
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-save me-2"></i> Crear Accidente
+      </button>
+      <button type="submit" name="action" value="asignarme" class="btn btn-outline-primary">
+        Asígname y crear
+      </button>
+      <a href="{% url 'adminpanel:mis_investigaciones' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+{# Modal Bootstrap para crear trabajador #}
+<div class="modal fade" id="modalCrearTrabajador" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content"><!-- contenido se inyecta por HTMX --></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    document.body.addEventListener('trabajador-creado', function (e) {
+      var d = (e && e.detail) || {};
+      var id = d.id;
+      try {
+        var modalEl = document.getElementById('modalCrearTrabajador');
+        if (modalEl) {
+          var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+          modal.hide();
+        }
+      } catch (_) {}
+      if (id) {
+        var hid = document.getElementById('id_trabajador_id');
+        if (hid) hid.value = id;
+      }
+    });
+
+    document.body.addEventListener('trabajador-seleccionado', function (e) {
+      var d = (e && e.detail) || {};
+      var id = d.id;
+      if (id) {
+        var hid = document.getElementById('id_trabajador_id');
+        if (hid) hid.value = id;
+      }
+    });
+
+    document.body.addEventListener('usuario-seleccionado', function (e) {
+      var d = (e && e.detail) || {};
+      var id = d.id, nombre = d.nombre;
+      var hid = document.getElementById('id_usuario_asignado');
+      if (hid && id) hid.value = id;
+      var chip = document.getElementById('usuario-seleccionado');
+      if (chip && nombre) { chip.textContent = nombre; chip.classList.remove('d-none'); }
+    });
+
+    // Cuando cambia la empresa, limpiar selección de usuario
+    document.addEventListener('change', function(e){
+      if (e.target && e.target.id === 'id_empresa') {
+        var uhid = document.getElementById('id_usuario_asignado'); if (uhid) uhid.value = '';
+        var upanel = document.getElementById('usuario-panel'); if (upanel) upanel.replaceChildren();
+        var chip = document.getElementById('usuario-seleccionado'); if (chip) { chip.textContent=''; chip.classList.add('d-none'); }
+        var ures = document.getElementById('usuario-resultados'); if (ures) ures.replaceChildren();
+      }
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{# Espera item con: pk, title, objetivo, url, download_id, has_content #}
+
+<div class="card h-100">
+  <div class="card-body d-flex flex-column gap-3">
+
+    {# ===== Encabezado: icono/estado a la izq., Eliminar tarjeta a la der. ===== #}
+    <div class="d-flex justify-content-between align-items-start">
+      <div class="d-flex align-items-center gap-2">
+        <i class="fa-solid fa-file text-ist-primary" style="color: var(--primary-color);"></i>
+        <span class="text-muted small">Documento</span>
+        {% if item.has_content %}
+          <span class="badge bg-success">Cargado</span>
+        {% else %}
+          <span class="badge bg-secondary">Pendiente</span>
+        {% endif %}
+      </div>
+
+      {# Botón ELIMINAR TARJETA (elimina registro + archivo si aplica) #}
+      <form class="m-0">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="doc_id" value="{{ item.pk }}">
+        <input type="hidden" name="anchor" value="doc-{{ item.pk }}">
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-danger d-inline-flex align-items-center"
+          hx-post="{% url 'accidentes:ia_fotos' codigo %}"
+          hx-include="closest form"
+          hx-target="#doc-{{ item.pk }}"
+          hx-swap="delete"
+          hx-confirm="¿Eliminar esta tarjeta definitivamente?"
+          hx-indicator="#docs-indicator">
+          <i class="fa-solid fa-trash-can me-2"></i> Eliminar tarjeta
+        </button>
+      </form>
+    </div>
+
+    {# ===== Título/objetivo ===== #}
+    <h6 class="mb-1">{{ item.title }}</h6>
+    {% if item.objetivo %}
+      <p class="text-muted small mb-0"><em>{{ item.objetivo }}</em></p>
+    {% endif %}
+
+    {% if item.has_content %}
+
+      {# === Contenido cargado === #}
+      {% if item.url %}
+        {# Caso: ENLACE http/https #}
+        <div class="doc-actions d-flex flex-column flex-sm-row gap-2 mt-2">
+          <a href="{{ item.url }}"
+             target="_blank" rel="noopener"
+             class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center action-primary">
+            <i class="fa-solid fa-arrow-up-right-from-square me-2"></i> Abrir enlace
+          </a>
+
+          {# Botón LIMPIAR ENLACE (deja target vacío para volver a subir/subir otro enlace) #}
+          <form class="m-0">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="clear_content">
+            <input type="hidden" name="doc_id" value="{{ item.pk }}">
+            <input type="hidden" name="anchor" value="doc-{{ item.pk }}">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-warning d-flex align-items-center justify-content-center action-secondary"
+              hx-post="{% url 'accidentes:ia_fotos' codigo %}"
+              hx-include="closest form"
+              hx-target="closest .col"
+              hx-swap="outerHTML"
+              hx-confirm="¿Quitar el enlace de este documento? (Podrás cargar otro después)"
+              hx-indicator="#docs-indicator">
+              <i class="fa-solid fa-eraser me-2"></i> Quitar enlace
+            </button>
+          </form>
+        </div>
+
+      {% elif item.download_id %}
+        {# Caso: ARCHIVO protegido #}
+        <div class="doc-actions d-flex flex-column flex-sm-row gap-2 mt-2">
+          <a href="{% url 'accidentes:descargar_documento' item.download_id %}"
+             target="_blank" rel="noopener"
+             class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center action-primary">
+            <i class="fa-solid fa-download me-2"></i> Descargar archivo
+          </a>
+
+          {# Botón LIMPIAR ARCHIVO (borra archivo y deja tarjeta vacía) #}
+          <form class="m-0">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="clear_content">
+            <input type="hidden" name="doc_id" value="{{ item.pk }}">
+            <input type="hidden" name="anchor" value="doc-{{ item.pk }}">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-warning d-flex align-items-center justify-content-center action-secondary"
+              hx-post="{% url 'accidentes:ia_fotos' codigo %}"
+              hx-include="closest form"
+              hx-target="closest .col"
+              hx-swap="outerHTML"
+              hx-confirm="¿Quitar el archivo de esta tarjeta? (Podrás subir otro después)"
+              hx-indicator="#docs-indicator">
+              <i class="fa-solid fa-eraser me-2"></i> Quitar archivo
+            </button>
+          </form>
+        </div>
+      {% endif %}
+
+    {% else %}
+
+      {# === Formulario para completar PENDIENTE === #}
+      <form
+        hx-post="{% url 'accidentes:ia_fotos' codigo %}"
+        hx-target="closest .col"
+        hx-swap="outerHTML"
+        hx-encoding="multipart/form-data"
+        hx-indicator="#docs-indicator">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="complete_pending">
+        <input type="hidden" name="doc_id" value="{{ item.pk }}">
+        <input type="hidden" name="anchor" value="doc-{{ item.pk }}">
+
+        <div class="mt-2">
+          <label class="form-label">Enlace URL</label>
+          <input type="url" name="link" class="form-control file" placeholder="http://...">
+        </div>
+        <div>
+          <label class="form-label">Subir archivo</label>
+          <input type="file" name="file" class="form-control file">
+        </div>
+
+        <div class="mt-auto d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary-custom btn-sm file">Guardar</button>
+        </div>
+      </form>
+
+    {% endif %}
+
+  </div>
+</div>
+
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

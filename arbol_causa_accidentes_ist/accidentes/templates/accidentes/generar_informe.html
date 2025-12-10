@@ -1,0 +1,184 @@
+{% extends "accidentes/base.html" %}
+{% load static %}
+
+{% block title %}Generar Informe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'accidentes/css/base.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 1200px;">
+    <div class="informe-wrap">
+        <div class="titular-page d-flex align-items-end justify-content-between flex-wrap gap-2">
+        <div>
+            <h5 class="card-title mb-1">
+            <i class="fas fa-file-alt me-2" style="color: var(--primary-color);"></i>
+            Generar Informe
+            </h5>
+            <p class="muted">Accidente <strong>{{ codigo }}</strong></p>
+        </div>
+
+        {# --- Descargar versión actual (HTMX para toast + descarga) --- #}
+        {% if current_informe %}
+        <form
+            method="post"
+            action="{% url 'accidentes:generar_informe' codigo %}"
+            hx-post="{% url 'accidentes:generar_informe' codigo %}"
+            hx-swap="none"
+            hx-indicator=".htmx-indicator"
+            hx-on='file-download: (function(e){
+            var u = e && e.detail && e.detail.url;
+            if(!u) return;
+            try{ window.location.assign(u); } catch(_) { window.location = u; }
+            setTimeout(function(){ window.location.reload(); }, 1200);
+            })(event)'
+        >
+            {% csrf_token %}
+            <input type="hidden" name="action" value="download">
+            <input type="hidden" name="codigo_informe" value="{{ current_informe.codigo }}">
+            <input type="hidden" name="version" value="{{ current_informe.version }}">
+            <button type="submit" class="btn btn-outline-primary">
+            Descargar versión actual ({{ current_informe.codigo }} v{{ current_informe.version }})
+            </button>
+        </form>
+        {% elif informes %}
+        {% with latest=informes|first %}
+        <form
+            method="post"
+            action="{% url 'accidentes:generar_informe' codigo %}"
+            hx-post="{% url 'accidentes:generar_informe' codigo %}"
+            hx-swap="none"
+            hx-indicator=".htmx-indicator"
+            hx-on='file-download: (function(e){
+            var u = e && e.detail && e.detail.url;
+            if(!u) return;
+            try{ window.location.assign(u); } catch(_) { window.location = u; }
+            setTimeout(function(){ window.location.reload(); }, 1200);
+            })(event)'
+        >
+            {% csrf_token %}
+            <input type="hidden" name="action" value="download">
+            <input type="hidden" name="codigo_informe" value="{{ latest.codigo }}">
+            <input type="hidden" name="version" value="{{ latest.version }}">
+            <button type="submit" class="btn btn-outline-primary">
+            Descargar versión actual ({{ latest.codigo }} v{{ latest.version }})
+            </button>
+        </form>
+        {% endwith %}
+        {% endif %}
+        </div>
+
+        <div class="card mb-4">
+        <form method="post" action="{% url 'accidentes:generar_informe' codigo %}">
+            {% csrf_token %}
+            <div class="grid">
+            <div>
+                <label class="form-label">Informe N° *</label>
+                <input type="text" name="codigo_informe" required class="form-control" value="{{ default_codigo_informe }}">
+            </div>
+            <div>
+                <label class="form-label">Investigador *</label>
+                <input type="text" name="investigador" required class="form-control" value="{{ default_investigador }}">
+            </div>
+            <div>
+                <label class="form-label">Fecha Informe *</label>
+                <input type="date" name="fecha_informe" required class="form-control" value="{{ default_fecha|date:'Y-m-d' }}">
+            </div>
+            <div class="d-flex align-items-end">
+                <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="1" id="chkDescargar" name="descargar">
+                <label class="form-check-label" for="chkDescargar">Descargar al generar</label>
+                </div>
+            </div>
+            </div>
+            <div class="mt-3">
+            <button type="submit" name="action" value="generate" class="btn btn-primary-custom">
+                Generar informe
+            </button>
+            </div>
+        </form>
+        </div>
+
+        <div class="card">
+        <h2 class="h5 mb-3">Versiones del informe</h2>
+
+        {% if informes %}
+        <div class="list-rows">
+            {% for inf in informes %}
+            <div class="row-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <div>
+                <strong>{{ inf.codigo }}</strong> — v{{ inf.version }}
+                {% if inf.is_current %}
+                    <span class="badge bg-success ms-1">Actual</span>
+                {% endif %}
+                </div>
+                <div class="muted">
+                Investigador: {{ inf.investigador }} · Fecha: {{ inf.fecha_informe|date:"Y-m-d" }}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                {# Descargar esta versión (HTMX para toast + descarga) #}
+                <form
+                method="post"
+                action="{% url 'accidentes:generar_informe' codigo %}"
+                hx-post="{% url 'accidentes:generar_informe' codigo %}"
+                hx-swap="none"
+                hx-indicator=".htmx-indicator"
+                hx-on='file-download: (function(e){
+                    var u = e && e.detail && e.detail.url;
+                    if(!u) return;
+                    try{ window.location.assign(u); } catch(_) { window.location = u; }
+                    setTimeout(function(){ window.location.reload(); }, 1200);
+                })(event)'
+                >
+                {% csrf_token %}
+                <input type="hidden" name="action" value="download">
+                <input type="hidden" name="codigo_informe" value="{{ inf.codigo }}">
+                <input type="hidden" name="version" value="{{ inf.version }}">
+                <button type="submit" class="btn btn-outline-primary btn-sm">Descargar</button>
+                </form>
+
+                {% if not inf.is_current %}
+                <form method="post" action="{% url 'accidentes:generar_informe' codigo %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="restore">
+                <input type="hidden" name="codigo_informe" value="{{ inf.codigo }}">
+                <input type="hidden" name="from_version" value="{{ inf.version }}">
+                <button type="submit" class="btn btn-warning btn-sm">Restaurar</button>
+                </form>
+                {% endif %}
+
+                <form method="post" action="{% url 'accidentes:generar_informe' codigo %}"
+                    onsubmit="return confirm('¿Eliminar definitivamente {{ inf.codigo }} v{{ inf.version }}?');">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="informe_id" value="{{ inf.pk }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
+                </form>
+            </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="muted mb-0">Aún no hay informes generados.</p>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        // Listener global como respaldo: por si el evento no es capturado por el form.
+        document.body.addEventListener('file-download', function (e) {
+        var d = (e && e.detail) || {};
+        if (!d.url) return;
+        try { window.location.assign(d.url); } catch (_) { window.location = d.url; }
+        setTimeout(function(){ window.location.reload(); }, 1200); // opcional
+        });
+    </script>
+{% endblock %}

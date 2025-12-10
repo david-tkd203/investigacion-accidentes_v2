@@ -1,0 +1,58 @@
+{# templates/accidentes/notification.html #}
+<div id="toast-area"
+        class="position-fixed bottom-0 end-0 p-3"
+        style="z-index:1080;"
+        aria-live="polite"
+        aria-atomic="true"
+        {% if request.META.HTTP_HX_REQUEST or is_htmx %}hx-swap-oob="true"{% endif %}>
+
+    {% if messages %}
+        {% for message in messages %}
+        {% if 'danger' in message.tags %}
+            <div class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000" data-bs-autohide="true">
+            <div class="toast-header bg-danger text-white border-0">
+                <span class="me-2">❌</span><strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
+            <div class="toast-body">{{ message }}</div>
+            </div>
+
+        {% elif 'warning' in message.tags %}
+            <div class="toast align-items-center text-bg-warning border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000" data-bs-autohide="true">
+            <div class="toast-header bg-warning text-white border-0">
+                <span class="me-2">⚠️</span><strong class="me-auto">Atención</strong>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
+            <div class="toast-body">{{ message }}</div>
+            </div>
+
+        {% elif 'success' in message.tags %}
+            <div class="toast align-items-center text-bg-success border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000" data-bs-autohide="true">
+            <div class="toast-header bg-success text-white border-0">
+                <span class="me-2">✔️</span><strong class="me-auto">¡Éxito!</strong>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
+            <div class="toast-body">{{ message }}</div>
+            </div>
+
+        {% elif 'info' in message.tags %}
+            <div class="toast align-items-center text-bg-info border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000" data-bs-autohide="true">
+            <div class="toast-header bg-info text-white border-0">
+                <span class="me-2">ℹ️</span><strong class="me-auto">Información</strong>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
+            <div class="toast-body">{{ message }}</div>
+            </div>
+
+        {% else %}
+            <div class="toast align-items-center text-bg-secondary border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000" data-bs-autohide="true">
+            <div class="toast-header bg-secondary text-white border-0">
+                <span class="me-2">ℹ️</span><strong class="me-auto">Aviso</strong>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
+            <div class="toast-body">{{ message }}</div>
+            </div>
+        {% endif %}
+        {% endfor %}
+    {% endif %}
+</div>

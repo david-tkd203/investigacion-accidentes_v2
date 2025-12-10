@@ -1,0 +1,76 @@
+{# adminpanel/partials/report/_filters.html #}
+<div class="row g-3 align-items-end mt-1">
+    {# Holding solo para admin/admin_ist #}
+    {% if user_rol in 'admin,admin_ist' or user_rol == 'admin' or user_rol == 'admin_ist' %}
+        <div class="col-12 col-md-3">
+        <label class="form-label">Holding</label>
+        <select id="id_holding" name="holding_id" class="form-select"
+                hx-get="{% url 'adminpanel:report_excel_filters' %}"
+                hx-trigger="change"
+                hx-target="#filters-row"
+                hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador"
+                hx-indicator=".htmx-indicator">
+            <option value="">(Todos)</option>
+            {% for h in filter_holdings %}
+            <option value="{{ h.pk }}" {% if sel_holding_id|stringformat:'s' == h.pk|stringformat:'s' %}selected{% endif %}>
+                {{ h.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+        </div>
+    {% endif %}
+
+    {# Empresa para admin/admin_ist/admin_holding #}
+    {% if user_rol in 'admin,admin_ist,admin_holding' or user_rol == 'admin' or user_rol == 'admin_ist' or user_rol == 'admin_holding' %}
+        <div class="col-12 col-md-3">
+        <label class="form-label">Empresa</label>
+        <select id="id_empresa" name="empresa_id" class="form-select"
+                hx-get="{% url 'adminpanel:report_excel_filters' %}"
+                hx-trigger="change"
+                hx-target="#filters-row"
+                hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador"
+                hx-indicator=".htmx-indicator">
+            <option value="">(Todas)</option>
+            {% for e in filter_empresas %}
+            <option value="{{ e.pk }}" {% if sel_empresa_id|stringformat:'s' == e.pk|stringformat:'s' %}selected{% endif %}>
+                {{ e.empresa_sel }}
+            </option>
+            {% endfor %}
+        </select>
+        </div>
+    {% endif %}
+
+    <div class="col-12 col-md-3">
+        <label class="form-label">Investigador</label>
+        <select id="id_investigador" name="investigador_id" class="form-select"
+                hx-get="{% url 'adminpanel:report_excel_filters' %}"
+                hx-trigger="change"
+                hx-target="#filters-row"
+                hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador"
+                hx-indicator=".htmx-indicator">
+        <option value="">(Todos)</option>
+        {% for u in filter_investigadores %}
+            <option value="{{ u.pk }}" {% if sel_investigador_id|stringformat:'s' == u.pk|stringformat:'s' %}selected{% endif %}>
+            {{ u.get_full_name|default:u.username }}
+            </option>
+        {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <label class="form-label">Coordinador</label>
+        <select id="id_coordinador" name="coordinador_id" class="form-select"
+                hx-get="{% url 'adminpanel:report_excel_filters' %}"
+                hx-trigger="change"
+                hx-target="#filters-row"
+                hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador"
+                hx-indicator=".htmx-indicator">
+        <option value="">(Todos)</option>
+        {% for u in filter_coordinadores %}
+            <option value="{{ u.pk }}" {% if sel_coordinador_id|stringformat:'s' == u.pk|stringformat:'s' %}selected{% endif %}>
+            {{ u.get_full_name|default:u.username }}
+            </option>
+        {% endfor %}
+        </select>
+    </div>
+</div>

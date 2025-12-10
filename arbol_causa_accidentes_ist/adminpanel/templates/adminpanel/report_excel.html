@@ -1,0 +1,173 @@
+{% extends "adminpanel/base_adminpanel.html" %}
+{% load static %}
+
+{% block title %}Reporte Excel de Casos{% endblock %}
+
+{% block content %}
+<div class="container-lg py-3 py-md-4">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="tile-icon">
+      <i class="fas fa-file-excel text-white"></i>
+    </div>
+    <div>
+      <h1 class="h4 h3-md mb-1 text-dark fw-bold">Reporte Excel de Casos</h1>
+      <p class="mb-0 text-muted">Exporta a Excel los casos generados dentro de un rango de fechas</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post" action="{% url 'adminpanel:report_excel' %}">
+        {% csrf_token %}
+
+        {# límites globales que nos pasa la vista #}
+        <input type="hidden" id="min_accidente" value="{{ date_min_accidente }}">
+        <input type="hidden" id="min_creacion"  value="{{ date_min_creacion }}">
+        <input type="hidden" id="max_today"     value="{{ date_max_today }}">
+
+        {# ====== Filtros de fecha ====== #}
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Fecha desde</label>
+            <input
+              type="date"
+              class="form-control"
+              name="date_from"
+              id="id_date_from"
+              value="{{ date_from|default:default_from }}"
+              hx-get="{% url 'adminpanel:report_excel_preview' %}"
+              hx-trigger="change, keyup changed delay:300ms"
+              hx-target="#preview-box"
+              hx-indicator=".htmx-indicator"
+              hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador"
+            >
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Fecha hasta</label>
+            <input
+              type="date"
+              class="form-control"
+              name="date_to"
+              id="id_date_to"
+              value="{{ date_to|default:default_to }}"
+              hx-get="{% url 'adminpanel:report_excel_preview' %}"
+              hx-trigger="change, keyup changed delay:300ms"
+              hx-target="#preview-box"
+              hx-indicator=".htmx-indicator"
+              hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador"
+            >
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label d-block">Tipo de fecha</label>
+            <div class="btn-group" role="group" aria-label="Tipo fecha">
+              <input type="radio" class="btn-check" name="date_kind" id="dk_acc" value="accidente"
+                     {% if date_kind|default:"accidente" == "accidente" %}checked{% endif %}
+                     hx-get="{% url 'adminpanel:report_excel_preview' %}"
+                     hx-trigger="change"
+                     hx-target="#preview-box"
+                     hx-indicator=".htmx-indicator"
+                     hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador">
+              <label class="btn btn-outline-secondary" for="dk_acc">Fecha del accidente</label>
+
+              <input type="radio" class="btn-check" name="date_kind" id="dk_cre" value="creacion"
+                     {% if date_kind == "creacion" %}checked{% endif %}
+                     hx-get="{% url 'adminpanel:report_excel_preview' %}"
+                     hx-trigger="change"
+                     hx-target="#preview-box"
+                     hx-indicator=".htmx-indicator"
+                     hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador">
+              <label class="btn btn-outline-secondary" for="dk_cre">Fecha de creación</label>
+            </div>
+          </div>
+        </div>
+
+        {# ====== Filtros en cascada por rol (se cargan vía HTMX) ====== #}
+        <div id="filters-row"
+             class="mt-3"
+             hx-get="{% url 'adminpanel:report_excel_filters' %}"
+             hx-trigger="load"
+             hx-target="#filters-row"
+             hx-indicator=".htmx-indicator"
+             hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador">
+          {# Este bloque será reemplazado por adminpanel/partials/report/_filters.html #}
+        </div>
+
+        <hr class="my-4">
+
+        {# ====== Preview y botón de descarga ====== #}
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+          <div id="preview-box" class="mb-3 mb-sm-0"
+               hx-get="{% url 'adminpanel:report_excel_preview' %}"
+               hx-trigger="load"
+               hx-target="#preview-box"
+               hx-indicator=".htmx-indicator"
+               hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador">
+            {% include "adminpanel/partials/report/_preview.html" with count=None date_from=date_from|default:default_from date_to=date_to|default:default_to date_kind=date_kind|default:"accidente" %}
+          </div>
+
+          <button type="submit" class="btn btn-success d-inline-flex align-items-center gap-2">
+            <i class="fa-solid fa-download"></i>
+            <span>Descargar Excel</span>
+          </button>
+        </div>
+
+        <div
+          hx-get="{% url 'adminpanel:report_excel_table' %}"
+          hx-trigger="load, change from:#id_date_from, change from:#id_date_to, change from:input[name='date_kind'], change from:#id_holding, change from:#id_empresa, change from:#id_investigador, change from:#id_coordinador"
+          hx-target="#report-table"
+          hx-indicator=".htmx-indicator"
+          hx-include="#id_date_from, #id_date_to, input[name='date_kind'], #id_holding, #id_empresa, #id_investigador, #id_coordinador">
+        </div>
+
+        <div class="mt-4" id="report-table">
+          {# La tabla llega por HTMX #}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{# ====== JS para fijar min/max y clamp de valores ====== #}
+<script>
+  (function(){
+    const from  = document.getElementById('id_date_from');
+    const to    = document.getElementById('id_date_to');
+    const minAcc= document.getElementById('min_accidente').value;
+    const minCre= document.getElementById('min_creacion').value;
+    const maxDay= document.getElementById('max_today').value;
+
+    function currentKind(){
+      const k = document.querySelector('input[name="date_kind"]:checked');
+      return k ? k.value : 'accidente';
+    }
+
+    function applyBounds(){
+      // max hasta hoy
+      if (to) to.max = maxDay;
+
+      // min según tipo de fecha
+      const minKind = (currentKind() === 'creacion') ? minCre : minAcc;
+      if (from) from.min = minKind;
+
+      // clamp valores actuales si se van de rango
+      if (from && from.value && from.value < from.min) from.value = from.min;
+      if (to && to.value && to.value > to.max) to.value = to.max;
+
+      // coherencia from <= to
+      if (from && to && from.value && to.value && to.value < from.value) {
+        to.value = from.value;
+      }
+    }
+
+    document.addEventListener('change', function(e){
+      if (!e.target) return;
+      if (e.target.id === 'dk_acc' || e.target.id === 'dk_cre' || e.target.id === 'id_date_from' || e.target.id === 'id_date_to') {
+        applyBounds();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', applyBounds);
+    document.addEventListener('htmx:load', applyBounds);
+  })();
+</script>
+{% endblock %}

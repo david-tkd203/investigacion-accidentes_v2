@@ -1,0 +1,14 @@
+Django==5.2
+graphviz==0.21
+openai==1.97.1
+python-decouple==3.8
+python-dotenv==1.0.1
+gunicorn==22.0.0
+mysqlclient>=2.1
+django-htmx
+django-widget-tweaks
+python-docx>=1.1.2
+requests>=2.31.0
+openpyxl>=3.1.2
+et-xmlfile>=1.1.0 
+django-import-export==3.3.1

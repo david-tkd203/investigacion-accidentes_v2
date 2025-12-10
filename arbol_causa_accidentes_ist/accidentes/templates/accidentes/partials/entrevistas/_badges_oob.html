@@ -1,0 +1,12 @@
+<span id="accidentado-count" class="category-badge" hx-swap-oob="true">
+  {{ count_accidentado }}
+</span>
+<span id="testigo-count" class="category-badge" hx-swap-oob="true">
+  {{ count_testigo }}
+</span>
+<span id="supervision-count" class="category-badge" hx-swap-oob="true">
+  {{ count_supervision }}
+</span>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

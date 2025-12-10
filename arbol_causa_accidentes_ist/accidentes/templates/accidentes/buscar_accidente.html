@@ -1,0 +1,50 @@
+{# templates/accidentes/buscar_accidente.html #}
+{% extends "accidentes/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Buscar accidente{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Formulario de búsqueda -->
+    <div class="card shadow-sm p-4 mx-auto mb-4" style="max-width: 500px;">
+        <h2 class="text-center text-primary fw-bold mb-4">Buscar accidente por código</h2>
+        <form method="post" action="{% url 'accidentes:buscar' %}" id="search-form">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.codigo.label_tag }}
+                {% render_field form.codigo class="form-control" placeholder="Ej: IST2024-001" %}
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Buscar</button>
+        </form>
+    </div>
+
+    <!-- Mensaje de error -->
+    {% if error %}
+        <div class="alert alert-warning text-center mx-auto" style="max-width: 500px;">
+            {{ error }}
+        </div>
+    {% elif resultado %}
+        <!-- Resultado -->
+        <div class="card shadow-sm p-4 mx-auto mb-4" style="max-width: 500px;">
+            <h2 class="text-center text-primary fw-bold mb-4">Datos del accidente</h2>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>RUT:</strong> {{ resultado.trabajador.rut }}</li>
+                <li class="list-group-item"><strong>Nombre:</strong> {{ resultado.trabajador.nombre }}</li>
+                <li class="list-group-item"><strong>Fecha:</strong> {{ resultado.fecha_accidente }}</li>
+            </ul>
+            <!-- Botón cargar en sesión -->
+            <form method="post" action="{% url 'accidentes:cargar_accidente' %}" class="text-center" id="search-form">
+                {% csrf_token %}
+                <input type="hidden" name="codigo" value="{{ resultado.codigo }}">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    Ingresar a investigación de accidente
+                </button>
+            </form>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{# Muestra un pequeño resumen del resultado del filtro #}
+{% if count is not None %}
+    {% if count > 0 %}
+        <div class="alert alert-success py-2 px-3 mb-0" role="alert">
+        <strong>{{ count }}</strong> caso{{ count|pluralize:"s" }} coinciden con el rango
+        {% if date_kind == "creacion" %} (por <em>fecha de creación</em>){% else %} (por <em>fecha del accidente</em>){% endif %}.
+        </div>
+    {% else %}
+        <div class="alert alert-warning py-2 px-3 mb-0" role="alert">
+        No hay resultados para el rango seleccionado.
+        </div>
+    {% endif %}
+    {% else %}
+    <div class="text-muted small">
+        Selecciona un rango de fechas y tipo de fecha para previsualizar.
+    </div>
+{% endif %}

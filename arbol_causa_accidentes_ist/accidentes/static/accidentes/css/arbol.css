@@ -1,0 +1,383 @@
+/* accidentes/css/arbol.css */
+
+/* ---------- WRAPPER GENERAL ---------- */
+.arbol-wrapper {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Inter', sans-serif;
+}
+.arbol-wrapper h1 {
+    text-align: left;
+    color: #51287A;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* ---------- MENSAJES ---------- */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+.messages li {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+.messages li.success { background: #e6f4ea; color: #276749; }
+.messages li.error   { background: #fbeaea; color: #9b2c2c; }
+.messages li.warning { background: #fff4e5; color: #7b341e; }
+
+/* ---------- CONTROLES IA / IMPORTAR ---------- */
+.arbol-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+.btn-guardar,
+.btn-guardar-small,
+.btn-eliminar,
+.nav-btn {
+    background: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.95rem;
+}
+.btn-guardar:hover,
+.btn-guardar-small:hover,
+.nav-btn:hover {
+    background: #3e1f5b;
+}
+
+/* Botón eliminar estilo específico */
+.btn-eliminar {
+    background: #fbeaea;
+    color: #9b2c2c;
+}
+.btn-eliminar:hover {
+    background: #f2d6d6;
+}
+
+/* ---------- MIGAS DE PAN ---------- */
+.breadcrumbs {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+/* ---------- ÁREA DEL GRÁFICO ---------- */
+#graph {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Contenedor flex del SVG que usas en el template */
+#graph .svg-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-x: auto;
+}
+
+/* Caja visual del SVG (sustituye a .graph-svg que no existe en tu HTML) */
+#graph .svg-container {
+    display: inline-block;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 12px;
+    border: 4px solid #cecdcd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
+}
+
+/* El propio SVG */
+#graph .svg-container svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 100%;
+    transform: none;
+}
+
+/* Links dentro del SVG (navegación de nodos) */
+#graph a {
+    cursor: pointer;
+    text-decoration: none;
+}
+#graph a:hover {
+    opacity: 0.85;
+}
+
+/* Controles de zoom flotantes */
+#zoom-controls {
+    opacity: 0.95;
+    backdrop-filter: blur(4px);
+    border-radius: 10px;
+}
+#zoom-controls .btn {
+    line-height: 1;
+    padding: .25rem .5rem;
+}
+
+/* Código DOT en fallback */
+.dot-code {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    overflow: auto;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+/* ---------- NAVEGACIÓN ENTRE NODOS ---------- */
+.arbol-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1.5rem;
+}
+
+/* ---------- EDICIÓN DE NODOS ---------- */
+.arbol-edit {
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 6px;
+    padding: 1rem;
+}
+.text-input {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 600px) {
+    .arbol-controls,
+    .arbol-navigation,
+    .button-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .text-input,
+    .btn-guardar,
+    .btn-guardar-small,
+    .btn-eliminar,
+    .nav-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ===== CTA de generación/regeneración del árbol (scope: #arbol-container) ===== */
+
+/* Caja visual para el bloque inicial (sin árbol) y el de regenerar (con árbol) */
+#arbol-container > .text-center.mb-4,
+#arbol-container > .text-end.mb-3 {
+    --ist-brand: #51287A;   /* morado IST */
+    --ist-accent: #7A3DBD;
+    --ist-border: #E8E6EE;
+    background:
+        radial-gradient(900px 300px at -10% 0%, rgba(122,61,189,0.07) 0%, transparent 60%),
+        #fff;
+    border: 1px solid var(--ist-border);
+    border-left: 6px solid var(--ist-brand);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.05);
+}
+
+/* Variante visual para el bloque de "Volver a generar" */
+#arbol-container > .text-end.mb-3 {
+    border-left-color: #17A2B8;
+    background:
+        radial-gradient(900px 300px at -10% 0%, rgba(23,162,184,.08) 0%, transparent 60%),
+        #fff;
+}
+
+/* Botón principal dentro del bloque inicial (generar) */
+#arbol-container > .text-center.mb-4 .btn.btn-primary {
+    background: var(--ist-brand);
+    border-color: var(--ist-brand);
+    border-radius: 10px;
+    padding: .6rem 1rem;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(81,40,122,.25);
+}
+#arbol-container > .text-center.mb-4 .btn.btn-primary:hover {
+    background: #3E1F5B;
+    border-color: #3E1F5B;
+}
+
+/* Botón "Volver a generar" (respeta .btn-warning, solo suaviza bordes) */
+#arbol-container > .text-end.mb-3 .btn.btn-warning {
+    border-radius: 10px;
+    padding: .6rem 1rem;
+    font-weight: 600;
+}
+
+/* Alerta de requisitos pendientes (relato/hechos) */
+#arbol-container > .text-center.mb-4 > .alert {
+    background: rgba(255,179,0,.08);
+    border: 1px dashed rgba(255,179,0,.45);
+    color: #7b5d00;
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+/* Lista de requisitos como “chips” */
+#arbol-container > .text-center.mb-4 > .alert ul {
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+#arbol-container > .text-center.mb-4 > .alert ul li {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px dashed rgba(255,179,0,.5);
+    background: #fff;
+    font-size: .95rem;
+}
+
+/* Botones de acción dentro de la alerta (Ir a Relato / Ir a Hechos) */
+#arbol-container > .text-center.mb-4 > .alert .btn.btn-outline-primary.btn-sm {
+    border-color: #B9A7D0;
+    color: var(--ist-brand);
+    font-weight: 600;
+    border-radius: 10px;
+}
+#arbol-container > .text-center.mb-4 > .alert .btn.btn-outline-primary.btn-sm:hover {
+    background: rgba(81,40,122,.08);
+    border-color: #8F6BBE;
+}
+
+/* Apariencia del botón deshabilitado (cuando faltan requisitos) */
+#arbol-container > .text-center.mb-4 .btn[disabled] {
+    opacity: .7;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Ajuste fino de separación bajo la alerta */
+#arbol-container > .text-center.mb-4 .mt-2 {
+    margin-top: 8px !important;
+}
+/* ===== Forzar variante morada para el CTA dentro de #arbol-container ===== */
+#arbol-container .btn-primary {
+    background-color: #51287A !important; /* morado IST */
+    border-color: #51287A !important;
+    color: #fff !important;
+}
+
+#arbol-container .btn-primary:hover,
+#arbol-container .btn-primary:focus {
+    background-color: #3E1F5B !important; /* morado más oscuro */
+    border-color: #3E1F5B !important;
+    color: #fff !important;
+}
+
+#arbol-container .btn-primary:active,
+#arbol-container .btn-primary.active,
+#arbol-container .show > .btn-primary.dropdown-toggle {
+    background-color: #331547 !important; /* presión */
+    border-color: #331547 !important;
+    color: #fff !important;
+}
+
+#arbol-container .btn-primary:disabled,
+#arbol-container .btn-primary.disabled {
+    background-color: #51287A !important;
+    border-color: #51287A !important;
+    opacity: .65; /* conservar feedback de disabled */
+}
+
+/* Los enlaces "Ir a Relato / Ir a Hechos" usan outline-primary: morado también */
+#arbol-container .btn-outline-primary {
+    color: #51287A !important;
+    border-color: #51287A !important;
+}
+
+#arbol-container .btn-outline-primary:hover,
+#arbol-container .btn-outline-primary:focus {
+    background-color: rgba(81,40,122,.08) !important;
+    border-color: #3E1F5B !important;
+    color: #3E1F5B !important;
+}
+
+
+/* Responsive suave */
+@media (max-width: 640px) {
+    #arbol-container > .text-center.mb-4,
+    #arbol-container > .text-end.mb-3 {
+        padding: 14px;
+    }
+}
+/* ===== Regenerar árbol (btn-warning) en morado IST ===== */
+#arbol-container .btn.btn-warning {
+    /* Bootstrap 5 vars (por si están disponibles) */
+    --bs-btn-bg: #51287A;
+    --bs-btn-border-color: #51287A;
+    --bs-btn-hover-bg: #3E1F5B;
+    --bs-btn-hover-border-color: #3E1F5B;
+    --bs-btn-active-bg: #331547;
+    --bs-btn-active-border-color: #331547;
+    --bs-btn-color: #fff;
+
+    /* Fallbacks explícitos (garantizan el color en cualquier versión) */
+    background-color: #51287A !important;
+    border-color: #51287A !important;
+    color: #fff !important;
+
+    border-radius: 10px;
+    padding: .6rem 1rem;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(81,40,122,.18);
+}
+
+#arbol-container .btn.btn-warning:hover,
+#arbol-container .btn.btn-warning:focus {
+    background-color: #3E1F5B !important;
+    border-color: #3E1F5B !important;
+    color: #fff !important;
+}
+
+#arbol-container .btn.btn-warning:active,
+#arbol-container .btn.btn-warning.active,
+#arbol-container .show > .btn.btn-warning.dropdown-toggle {
+    background-color: #331547 !important;
+    border-color: #331547 !important;
+    color: #fff !important;
+}
+
+#arbol-container .btn.btn-warning:disabled,
+#arbol-container .btn.btn-warning.disabled {
+    background-color: #51287A !important;
+    border-color: #51287A !important;
+    opacity: .65;
+}
+
+#arbol-container .btn-ist{
+    background:#51287A; border-color:#51287A; color:#fff;
+    border-radius:10px; padding:.6rem 1rem; font-weight:600;
+}
+#arbol-container .btn-ist:hover{ background:#3E1F5B; border-color:#3E1F5B; }
+#arbol-container .btn-ist:active{ background:#331547; border-color:#331547; }

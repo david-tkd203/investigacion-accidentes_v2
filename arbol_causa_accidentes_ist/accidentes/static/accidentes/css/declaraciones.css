@@ -1,0 +1,193 @@
+/* declaraciones.css */
+/* Mensajes de Django (éxito, alerta, error) */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.messages li {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.messages li.success {
+    background: #e6f4ea;
+    color: #276749;
+    border-left: 4px solid #81c784;
+}
+
+.messages li.warning {
+    background: #fff4e5;
+    color: #7b341e;
+    border-left: 4px solid #f6ad55;
+}
+
+.messages li.error {
+    background: #fbeaea;
+    color: #9b2c2c;
+    border-left: 4px solid #f56565;
+}
+
+/* Wrapper general */
+.questions-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem; /* más espacio arriba/abajo */
+    box-sizing: border-box;
+}
+
+/* Contenedor de cada pregunta */
+.pregunta-box {
+    background-color: #f8f5fa;
+    border: 1px solid #e2d8f3;
+    padding: 1.5rem 1.5rem 1.25rem 1.5rem; /* más espacio en todos los lados */
+    margin-bottom: 2.5rem; /* más separación entre preguntas */
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Título y objetivo */
+.pregunta-box p {
+    margin: 1rem 0 0.75rem 0; /* más espacio arriba y abajo */
+}
+
+.pregunta-box .objetivo {
+    color: #555;
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem; /* más espacio abajo */
+}
+
+/* Formulario individual */
+.save-single-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 1rem; /* más espacio entre elementos */
+}
+
+/* Textarea común */
+.save-single-form textarea,
+textarea {
+    width: 100%;
+    padding: 1.25rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    box-sizing: border-box;
+    margin-bottom: 1.25rem; /* más espacio abajo */
+    resize: vertical;
+    min-height: 8rem; /* más alto */
+}
+
+/* Botón “+ Añadir pregunta” centrado */
+.add-btn {
+    background-color: #6d549f;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem; /* más grande */
+    font-size: 1.05rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: block;
+    margin: 1rem auto; /* más espacio arriba/abajo */
+}
+
+.add-btn:hover {
+    background-color: #5a3e84;
+}
+
+/* Formulario de “Añadir pregunta” */
+.add-form {
+    display: none;
+    flex-direction: column;
+    margin-top: 1rem; /* más espacio arriba */
+    gap: 0.75rem; /* más espacio entre campos */
+}
+
+.add-form input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+/* Botones individuales (guardar/editar) */
+.btn-guardar-small {
+    background-color: #7353B2;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem; /* más grande */
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: background-color 0.2s;
+    margin-left: 1rem;
+    margin-top: 0.75rem;
+}
+
+.btn-guardar-small:hover {
+    background-color: #61338F;
+}
+
+/* Botón grande (generar todas o persistir global) */
+.btn-guardar {
+    background-color: #51287A;
+    color: #fff;
+    border: none;
+    padding: 1.2rem 2.5rem; /* más grande */
+    font-size: 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 2rem;
+}
+
+.btn-guardar:hover {
+    background-color: #3e1f5b;
+}
+
+/* Agrupación de botones globales */
+.button-group {
+    margin-top: 3rem;
+    text-align: center;
+    gap: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.button-group .btn-guardar {
+    margin: 0 1rem;
+}
+
+/* centrar el botón “+ Añadir pregunta” */
+.add-btn-wrapper {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.btn-add {
+    background-color: #6d549f;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.05rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-add:hover {
+    background-color: #5a3e84;
+}

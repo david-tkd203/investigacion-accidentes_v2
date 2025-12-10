@@ -1,0 +1,195 @@
+/* accidentes/css/hechos.css */
+
+/* 1) Wrapper general: dejamos que ocupe casi toda la pantalla */
+.hechos-wrapper {
+    width: 75vw;          /* 90% del viewport */
+    max-width: none;      /* ya no limitamos a 800px */
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.hechos-wrapper h1 {
+    text-align: center;
+    color: #51287A;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+/* 2) Mensajes */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+.messages li {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+.messages li.success { background: #e6f4ea; color: #276749; }
+.messages li.warning { background: #fff4e5; color: #7b341e; }
+.messages li.error   { background: #fbeaea; color: #9b2c2c; }
+
+/* 3) Botón inicial/formulario */
+.fact-form {
+    background: #fff;
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+.fact-form .btn-guardar {
+    padding: 0.75rem 1.5rem;
+    background-color: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.fact-form .btn-guardar:hover {
+    background-color: #3e1f5b;
+}
+
+/* 4) Lista de hechos */
+.facts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Cada hecho */
+.fact-item {
+    background: #fff;
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    /* padding más contenido vertical, pero quitamos el 12rem horizontal */
+    padding: 1rem 2rem;
+    gap: 0.5rem;
+}
+
+/* Número del hecho */
+.fact-number {
+    color: #51287A;
+    font-weight: 600;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Texto o input del hecho */
+.fact-text {
+    flex: 1 1 auto;      /* ocupa todo lo que quede */
+    display: flex;
+    align-items: center;
+    min-width: 0;        /* para que el flex-shrink funcione bien */
+}
+.fact-text .fact-input {
+    width: 100%;         /* ahora sí puede crecer */
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fafafa;
+    transition: border-color 0.2s;
+    margin-right: 0.5rem; /* pequeño gap a los botones */
+}
+.fact-text .fact-input:focus {
+    outline: none;
+    border-color: #51287A;
+}
+
+/* 5) Botones de cada hecho */
+.fact-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+.btn-modificar,
+.btn-eliminar {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-modificar {
+    background: #e2d8f3;
+    color: #51287A;
+}
+.btn-modificar:hover {
+    background-color: #d4c7e8;
+}
+.btn-eliminar {
+    background: #fbeaea;
+    color: #9b2c2c;
+}
+.btn-eliminar:hover {
+    background-color: #f2d6d6;
+}
+
+/* 6) Botón “Añadir un hecho” */
+.fact-actions {
+    text-align: center;
+    margin-top: 1rem;
+}
+.fact-actions .btn-guardar-small {
+    padding: 0.75rem 1.5rem;
+    background-color: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.fact-actions .btn-guardar-small:hover {
+    background-color: #3e1f5b;
+}
+
+
+/* 7) Responsive */
+@media (max-width: 600px) {
+    .hechos-wrapper {
+        width: 100%;
+        padding: 0 0.5rem;
+    }
+    .fact-form {
+        padding: 1rem;
+    }
+    .fact-form .btn-guardar,
+    .fact-actions .btn-guardar-small,
+    .btn-modificar,
+    .btn-eliminar {
+        width: 100%;
+        display: block;
+        margin: 0.5rem 0 0;
+    }
+    .facts-list {
+        gap: 1rem;
+    }
+    .fact-item {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+    }
+    .fact-number {
+        margin-bottom: 0.5rem;
+    }
+    .fact-text {
+        margin-bottom: 0.75rem;
+    }
+    .fact-buttons {
+        justify-content: flex-end;
+    }
+}

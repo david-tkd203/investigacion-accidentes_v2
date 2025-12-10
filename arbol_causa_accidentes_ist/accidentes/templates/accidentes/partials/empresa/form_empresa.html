@@ -1,0 +1,136 @@
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title mb-1">
+      <i class="fas fa-building me-2" style="color: var(--primary-color);"></i>
+      Información del Centro de Trabajo
+    </h5>
+    <p class="card-text text-muted mb-0">Complete los datos del centro de trabajo donde ocurrió el accidente</p>
+  </div>
+  <div class="card-body">
+    <form method="post" id="empresa-form"
+          hx-post="{% url 'accidentes:empresa' codigo %}"
+          hx-target="#form-container"
+          hx-swap="innerHTML">
+      {% csrf_token %}
+
+      <h5 class="mb-3">Empresa</h5>
+
+      <div class="row gy-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Holding</label>
+          <input type="text" class="form-control" value="{{ empresa.holding.nombre }}" readonly>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Razón Social</label>
+          <input type="text" class="form-control" value="{{ empresa.empresa_sel }}" readonly>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">RUT Empresa</label>
+          <input type="text" class="form-control" value="{{ empresa.rut_empresa }}" readonly>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Dirección Empresa</label>
+          <input type="text" class="form-control" value="{{ empresa.direccion_empresa }}" readonly>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Teléfono Empresa</label>
+          <input type="text" class="form-control" value="{{ empresa.telefono }}" readonly>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Representante Legal</label>
+          <input type="text" class="form-control" value="{{ empresa.representante_legal }}" readonly>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Actividad Económica</label>
+          <input type="text" class="form-control" value="{{ empresa.actividad }}" readonly>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <h5 class="mt-4 mb-3">Centro de Trabajo</h5>
+
+      <div class="row gy-3">
+        <!-- Región -->
+        <div class="col-12 col-md-6">
+          <label for="id_region" class="form-label">Región</label>
+          <select name="region" id="id_region" class="form-select"
+            hx-get="{% url 'accidentes:cargar_comunas_y_centros' codigo=codigo %}"
+            hx-include="[name='region'], [name='empresa_id']"
+            hx-trigger="change"
+            hx-target="this"
+            hx-swap="none"
+            hx-sync="closest form:drop">
+            {% for val, label in form.fields.region.choices %}
+              <option value="{{ val }}" {% if form.initial.region == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Comuna -->
+        <div class="col-12 col-md-6">
+          <label for="id_comuna" class="form-label">Comuna</label>
+          <select name="comuna" id="id_comuna" class="form-select"
+                  hx-get="{% url 'accidentes:cargar_centros_y_direccion' codigo=codigo %}"
+                  hx-include="[name='region'], [name='comuna'], [name='empresa_id']"
+                  hx-trigger="change"
+                  hx-target="#id_centro_id_select"
+                  hx-swap="outerHTML"
+                  hx-sync="closest form:drop">
+            {% for val, label in form.fields.comuna.choices %}
+              <option value="{{ val }}" {% if form.initial.comuna == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Nombre del centro (por ID) -->
+        <div class="col-12 col-md-6">
+          <label for="id_centro_id_select" class="form-label">Nombre del Centro</label>
+          <select name="centro_id" id="id_centro_id_select" class="form-select"
+                  hx-get="{% url 'accidentes:cargar_direccion_y_id' codigo=codigo %}"
+                  hx-include="[name='region'], [name='comuna'], [name='empresa_id'], [name='centro_id']"
+                  hx-trigger="change"
+                  hx-target="#direccion-wrapper"
+                  hx-swap="outerHTML"
+                  hx-sync="closest form:drop">
+            <option value="">---------</option>
+            {% if accidente.centro_id %}
+              <option value="{{ accidente.centro_id }}" selected>
+                {{ accidente.centro.nombre_local }}{% if accidente.centro.direccion_centro %} — {{ accidente.centro.direccion_centro }}{% endif %}
+              </option>
+            {% endif %}
+          </select>
+        </div>
+
+        <!-- Dirección del centro (auto-carga en load y cuando cambie centro) -->
+        <div class="col-12 col-md-6"
+            id="direccion-wrapper"
+            hx-get="{% url 'accidentes:cargar_direccion_y_id' codigo=codigo %}"
+            hx-include="[name='region'], [name='comuna'], [name='empresa_id'], [name='centro_id']"
+            hx-trigger="change from:#id_centro_id_select, refresh-direccion"
+            hx-swap="outerHTML">
+          <label for="{{ form.direccion_centro.id_for_label }}" class="form-label">Dirección del Centro</label>
+          {{ form.direccion_centro }}
+          {{ form.direccion_centro.errors }}
+        </div>
+      </div>
+
+      <input type="hidden" name="empresa_id" value="{{ empresa.empresa_id }}">
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="submit" class="btn btn-primary-custom">
+          <i class="fas fa-save me-2"></i>Guardar datos
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

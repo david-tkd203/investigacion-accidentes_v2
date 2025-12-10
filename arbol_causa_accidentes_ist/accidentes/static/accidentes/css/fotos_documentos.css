@@ -1,0 +1,297 @@
+/* accidentes/css/fotos_documentos.css */
+
+/* 1) Reset global */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background: #f8f9fa;
+    color: #333;
+    overflow-x: hidden;  /* evita scroll horizontal */
+}
+
+/* 2) Contenedor principal junto al sidebar */
+.main-content {
+    margin-left: 220px;               /* espacio para el sidebar */
+    width: calc(100% - 220px);        /* ocupa el resto */
+    height: 100vh;                    /*  toda la altura de la ventana */
+    padding: 2rem 1rem;
+    overflow-y: auto;                 /* scroll vertical interno */
+    background: #f8f9fa;
+}
+
+/* 3) Títulos */
+.main-content h1,
+.main-content h2 {
+    text-align: center;
+    color: #51287A;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    position: relative;
+}
+.main-content h1::after,
+.main-content h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: #51287A;
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+}
+
+/* 4) Mensajes */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+.messages li {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+.messages li.success { background: #e6f4ea; color: #276749; }
+.messages li.warning { background: #fff4e5; color: #7b341e; }
+.messages li.error   { background: #fbeaea; color: #9b2c2c; }
+
+/* 5) Separador */
+hr {
+    border: none;
+    height: 1px;
+    background: #e2d8f3;
+    margin: 2rem 0;
+}
+
+/* 6) Contenedor de tarjetas sugeridas: apilado vertical */
+.suggested-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* 7) Tarjeta .document-box */
+.document-box {
+    background: #fff;
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: visible;
+}
+.document-box p {
+    margin: 0;
+    line-height: 1.4;
+}
+.document-box p strong { color: #3e1f5b; }
+.document-box p em {
+    display: block;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+/* 8) Formulario interno de cada tarjeta */
+.document-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.document-box label {
+    font-weight: 500;
+    color: #444;
+}
+.document-box input[type="url"],
+.document-box input[type="file"] {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+}
+.document-box input:focus {
+    outline: none;
+    border-color: #51287A;
+}
+
+/* 9) Botón Guardar en tarjeta */
+.btn-guardar {
+    padding: 0.8rem 1.6rem;
+    background-color: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    align-self: center;
+    transition: background-color 0.2s;
+}
+.btn-guardar:hover {
+    background-color: #3e1f5b;
+}
+
+/* 10) Lista de subidos */
+.uploaded-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+.uploaded-list li {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+.uploaded-list a {
+    color: #51287A;
+    text-decoration: none;
+}
+.uploaded-list a:hover {
+    text-decoration: underline;
+}
+.btn-guardar-small {
+    padding: 0.4rem 0.8rem;
+    background-color: #51287A;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s;
+}
+.btn-guardar-small:hover {
+    background-color: #3e1f5b;
+}
+
+/* 11) Subida libre */
+.upload-form {
+    background: #fff;
+    border: 1px solid #e2d8f3;
+    border-left: 4px solid #51287A;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    gap: 1rem;
+    margin: 0 auto 2rem;
+}
+.upload-form label {
+    font-weight: 500;
+    color: #444;
+}
+.upload-form input[type="text"],
+.upload-form input[type="url"],
+.upload-form input[type="file"] {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* 12) Botones añadir / guardar todo */
+#add-doc-btn {
+    display: block;
+    margin: 1rem auto;
+}
+.final-action {
+    text-align: center;
+    margin: 2rem 0;
+}
+.final-action .btn-guardar {
+    padding: 0.85rem 2rem;
+}
+
+/* 13) Responsive */
+/* Tablet y pantallas medianas */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1.5rem;
+    }
+    .suggested-container,
+    .document-box,
+    .upload-form {
+        width: 80%;
+        max-width: none;
+    }
+}
+
+/* Móviles grandes / phablets */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem;
+    }
+    .suggested-container,
+    .document-box,
+    .upload-form {
+        width: 95%;
+    }
+    .document-box {
+        padding: 1.25rem;
+    }
+    .btn-guardar,
+    .btn-guardar-small {
+        width: 100%;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 0.75rem;
+    }
+    h1, h2 {
+        font-size: 1.25rem;
+    }
+    .document-box {
+        padding: 1rem;
+    }
+    .document-box label,
+    .upload-form label {
+        font-size: 0.9rem;
+    }
+    .document-box input[type="url"],
+    .document-box input[type="file"],
+    .upload-form input[type="url"],
+    .upload-form input[type="file"],
+    .upload-form input[type="text"] {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .btn-guardar,
+    .final-action .btn-guardar {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+    }
+    .uploaded-list li {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .uploaded-list li a {
+        word-break: break-all;
+    }
+}

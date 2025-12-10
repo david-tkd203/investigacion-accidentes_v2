@@ -1,0 +1,61 @@
+/* ===== Paleta IST (aprox) ===== */
+:root{
+    --ist-purple:#5b2d90;   /* primario */
+    --ist-violet:#7a3db3;   /* gradiente */
+    --ist-pink:#ff4f9a;     /* acento */
+    --ink:#1f1833;
+    --muted:#6b6480;
+    --line:#ece7f5;
+    --bg:#f7f4fb;
+}
+
+/* Hero / banda superior */
+.ist-hero{
+    background: linear-gradient(135deg,var(--ist-purple),var(--ist-violet));
+    box-shadow: 0 8px 20px rgba(91,45,144,.18);
+    border-radius: 14px;
+}
+
+/* Chips */
+.chip{
+    display:inline-block; padding:4px 8px; border-radius:999px;
+    font-size:12px; font-weight:600; border:1px solid transparent;
+}
+.chip--violet{ background:#efe7ff; border-color:#d7c7ff; color:#5b2d90; }
+.chip--pink{ background:#ffe7f1; border-color:#ffd0e3; color:#cc2c75; }
+
+/* Código */
+.code{
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    background:#fbfaff; border:1px solid var(--line);
+    padding:2px 6px; border-radius:8px;
+}
+
+/* Botones con colores IST */
+.btn-ist{
+    background-color: var(--ist-purple);
+    border-color: var(--ist-purple);
+    color: #fff;
+}
+.btn-ist:hover{ background-color:#492374; border-color:#492374; color:#fff; }
+
+.btn-outline-ist{
+    color: var(--ist-purple);
+    border-color: var(--ist-purple);
+    background:#fff;
+}
+.btn-outline-ist:hover{
+    color: #fff; background: var(--ist-purple); border-color: var(--ist-purple);
+}
+
+/* Estado vacío */
+.empty{
+    display:flex; gap:8px; align-items:center; justify-content:center;
+    color: var(--muted); padding:18px; border:1px dashed var(--line);
+    border-radius:12px; background:#fff;
+}
+.empty__icon{ font-size:18px; }
+
+/* Mesa */
+.table thead th{ font-size:.8rem; color:#5d5485; }
+.table tbody tr:hover{ background:#fbf8ff; }

@@ -1,0 +1,217 @@
+<!-- Contenedor principal del SVG con zoom -->
+{% include "accidentes/notification.html" with is_htmx=is_htmx|default:0 %}
+<div id="graph" class="p-2 mb-4 position-relative {% if show_boton_generar_inicial %}d-none{% endif %}" style="overflow-x: auto; min-height: 400px;">
+
+  {% if svg %}
+    <!-- Botones de Zoom flotantes -->
+    <div id="zoom-controls" class="position-absolute top-0 end-0 m-2 z-3 bg-light rounded shadow-sm p-1">
+      <button id="zoom-out" class="btn btn-outline-secondary btn-sm me-1">−</button>
+      <button id="zoom-in" class="btn btn-outline-secondary btn-sm me-1">+</button>
+      <button id="zoom-reset" class="btn btn-outline-secondary btn-sm">Reset</button>
+    </div>
+
+    <!-- SVG centrado -->
+    <div class="svg-wrapper d-flex justify-content-center">
+      <div class="svg-container" id="svg-container">
+        {{ svg|safe }}
+      </div>
+    </div>
+  {% elif show_boton_generar_inicial %}
+    <div class="alert alert-info">No hay árbol generado aún.</div>
+  {% endif %}
+</div>
+
+<!-- Botones para generar árbol -->
+{% if show_boton_generar_inicial %}
+  <div class="text-center mb-4">
+    {% if puede_generar %}
+      <form
+        hx-post="{% url 'accidentes:generar_arbol' codigo %}"
+        hx-target="#arbol-container"
+        hx-swap="innerHTML"
+        hx-indicator="#relato-indicator"
+      >
+        {% csrf_token %}
+        <button type="submit" class="btn btn-guardar btn-primary-custom btn-lg">
+          Generar árbol de causas asistido por IA
+        </button>
+      </form>
+    {% else %}
+      <div class="alert alert-warning d-inline-block text-start">
+        <div class="mb-2"><strong>Faltan datos para generar el árbol:</strong></div>
+        <ul class="mb-2">
+          {% if faltan_relato %}<li>Relato final vigente.</li>{% endif %}
+          {% if faltan_hechos %}<li>Al menos un hecho registrado.</li>{% endif %}
+        </ul>
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="{% url 'accidentes:ia_relato' codigo %}" class="btn btn-outline-primary btn-sm">
+            Ir a Relato
+          </a>
+          <a href="{% url 'accidentes:ia_hechos' codigo %}" class="btn btn-outline-primary btn-sm">
+            Ir a Hechos
+          </a>
+        </div>
+      </div>
+      <div class="mt-2">
+        <button type="button" class="btn btn-guardar btn-primary-custom btn-lg" disabled>
+          Generar árbol de causas asistido por IA
+        </button>
+      </div>
+    {% endif %}
+  </div>
+
+{% elif show_boton_regenerar %}
+  <div class="text-end mb-3">
+    <form
+      hx-post="{% url 'accidentes:generar_arbol' codigo %}"
+      hx-target="#arbol-container"
+      hx-swap="innerHTML"
+      hx-indicator="#relato-indicator"
+    >
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        Volver a generar árbol de causas asistido por IA
+      </button>
+    </form>
+  </div>
+{% endif %}
+
+<!-- Formulario de edición -->
+{% if modo_edicion %}
+  <form
+    hx-post="{% url 'accidentes:ia_arbol' codigo %}"
+    hx-target="#arbol-container"
+    hx-swap="innerHTML"
+    class="border p-3 rounded bg-light"
+    hx-indicator="#relato-indicator"
+  >
+    {% csrf_token %}
+    <input type="hidden" name="node_id" value="{{ current_id }}">
+
+    <div class="mb-3">
+      <label class="form-label">Etiqueta del nodo actual:</label>
+      <input type="text" name="new_label" class="form-control" value="{{ current_label }}">
+    </div>
+
+    {# === NUEVO: Selector de destino para el nuevo hijo === #}
+    {% if child_targets and child_targets|length > 0 %}
+      <div class="mb-3">
+        <label class="form-label">Dónde agregar el nuevo hijo:</label>
+        <select name="attach_to" class="form-select form-select-sm">
+          <option value="">
+            Nueva rama (hijo directo del nodo actual)
+          </option>
+          {% for t in child_targets %}
+            <option value="{{ t.id }}">
+              Adjuntar dentro de: {{ t.label|truncatechars:80 }}
+            </option>
+          {% endfor %}
+        </select>
+        <div class="form-text">
+          Si eliges una rama, el nuevo hijo se añadirá como sub-nodo de esa rama existente.
+        </div>
+      </div>
+    {% else %}
+      {# Sin sugerencias: mantener comportamiento actual (nueva rama) #}
+      <input type="hidden" name="attach_to" value="">
+    {% endif %}
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <button name="action" value="edit_node" class="btn btn-success">Actualizar etiqueta</button>
+      <button name="action" value="add_child" class="btn btn-primary">Agregar hijo</button>
+      <button name="action" value="delete_current" class="btn btn-danger">Eliminar nodo</button>
+    </div>
+
+    <!--
+    <div class="d-flex flex-wrap gap-2">
+      <button name="action" value="navigate_root" class="btn btn-outline-dark">Raíz</button>
+      <button name="action" value="navigate_parent" class="btn btn-outline-dark">Padre</button>
+      <button name="action" value="navigate_first" class="btn btn-outline-dark">Primer hijo</button>
+      <button name="action" value="navigate_prev" class="btn btn-outline-dark">Anterior</button>
+      <button name="action" value="navigate_next" class="btn btn-outline-dark">Siguiente</button>
+    </div>
+    -->
+  </form>
+{% endif %}
+<script>
+  document.addEventListener("htmx:afterSettle", function () {
+    const container = document.getElementById("svg-container");
+    const zoomInBtn = document.getElementById("zoom-in");
+    const zoomOutBtn = document.getElementById("zoom-out");
+    const zoomResetBtn = document.getElementById("zoom-reset");
+
+    let currentScale = parseFloat(localStorage.getItem("svgZoom")) || 0.75;
+
+    function applyZoom() {
+      if (container) {
+        container.style.transform = `scale(${currentScale})`;
+        localStorage.setItem("svgZoom", currentScale);
+      }
+    }
+
+    if (zoomInBtn && zoomOutBtn && zoomResetBtn) {
+      zoomInBtn.onclick = () => {
+        currentScale = Math.min(currentScale + 0.1, 2);
+        applyZoom();
+      };
+      zoomOutBtn.onclick = () => {
+        currentScale = Math.max(currentScale - 0.1, 0.2);
+        applyZoom();
+      };
+      zoomResetBtn.onclick = () => {
+        currentScale = 0.75;
+        applyZoom();
+      };
+    }
+
+    applyZoom();
+
+    // Reasignar navegación de nodos
+    const links = document.querySelectorAll("#graph svg a");
+    links.forEach(link => {
+      link.onclick = null;
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        const href = this.getAttribute("xlink:href") || this.getAttribute("href");
+        if (!href) return;
+        const params = new URLSearchParams(href.split("?")[1]);
+        const nodeId = params.get("node_id");
+        if (!nodeId) return;
+
+        const url = `{% url 'accidentes:ia_arbol' codigo %}?action=navigate_to&node_id=${nodeId}`;
+
+        htmx.ajax('GET', url, {
+          target: "#arbol-container",
+          swap: "innerHTML"
+        });
+      }, { once: true });
+    });
+  });
+</script>
+
+<style>
+  .svg-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-x: auto;
+  }
+
+  .svg-container {
+    display: inline-block;
+    padding: 2rem;
+    transform-origin: top center;
+  }
+
+  .svg-container svg {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  #zoom-controls {
+    opacity: 0.95;
+  }
+</style>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

@@ -1,0 +1,33 @@
+<div class="border rounded p-2">
+  <div class="d-flex align-items-center justify-content-between">
+    <div>
+      <div class="fw-semibold">{{ trabajador.nombre_trabajador }}</div>
+      <div class="text-muted small">
+        {{ trabajador.rut_trabajador }} — {{ trabajador.empresa.empresa_sel|default:"Sin empresa" }}
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-sm btn-primary"
+        hx-get="{% url 'adminpanel:trabajador_select' %}?id={{ trabajador.pk }}"
+        hx-target="#trabajador-panel"
+        hx-swap="innerHTML"
+      >
+        Seleccionar
+      </button>
+
+      {# Limpiar: pedimos el lookup con rut="" y limpiamos el hidden vía OOB desde el parcial vacío #}
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-secondary"
+        hx-get="{% url 'adminpanel:trabajador_lookup' %}"
+        hx-target="#trabajador-panel"
+        hx-include="#id_holding, #id_empresa"
+        hx-vals='{"rut": ""}'
+      >
+        Limpiar
+      </button>
+    </div>
+  </div>
+</div>

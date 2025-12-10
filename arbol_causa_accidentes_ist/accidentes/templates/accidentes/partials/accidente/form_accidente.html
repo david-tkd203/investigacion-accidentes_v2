@@ -1,0 +1,197 @@
+<div class="form-wrapper">
+  <form method="post" id="accidente-form"
+        hx-post="{% url 'accidentes:accidente' codigo %}"
+        hx-target="#form-container"
+        hx-swap="innerHTML">
+    {% csrf_token %}
+
+    {{ form.usuario_asignado }} {# hidden para capturar errores del modelo #}
+    {% if form.usuario_asignado.errors %}
+      <div class="alert alert-danger mb-3">
+        {{ form.usuario_asignado.errors|striptags }}
+      </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-1">
+          <i class="fas fa-exclamation-triangle me-2" style="color: var(--primary-color);"></i>
+          Información del Accidente
+        </h5>
+        <p class="card-text text-muted mb-0">Registre los detalles específicos del accidente</p>
+      </div>
+
+      <div class="card-body">
+        <h5 class="mb-3">Datos del Accidente</h5>
+
+        <div class="row gy-3">
+          <div class="col-12 col-md-6">
+            <label for="{{ form.fecha_accidente.id_for_label }}" class="form-label">Fecha Accidente</label>
+            {{ form.fecha_accidente }}
+            {% if form.fecha_accidente.errors %}
+              <div class="invalid-feedback d-block">{{ form.fecha_accidente.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.hora_accidente.id_for_label }}" class="form-label">Hora Accidente</label>
+            {{ form.hora_accidente }}
+            {% if form.hora_accidente.errors %}
+              <div class="invalid-feedback d-block">{{ form.hora_accidente.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.lugar_accidente.id_for_label }}" class="form-label">Lugar Accidente</label>
+            {{ form.lugar_accidente }}
+            {% if form.lugar_accidente.errors %}
+              <div class="invalid-feedback d-block">{{ form.lugar_accidente.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.tipo_accidente.id_for_label }}" class="form-label">Tipo de Accidente</label>
+            {{ form.tipo_accidente }}
+            {% if form.tipo_accidente.errors %}
+              <div class="invalid-feedback d-block">{{ form.tipo_accidente.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.naturaleza_lesion.id_for_label }}" class="form-label">Naturaleza de la Lesión</label>
+            {{ form.naturaleza_lesion }}
+            {% if form.naturaleza_lesion.errors %}
+              <div class="invalid-feedback d-block">{{ form.naturaleza_lesion.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.parte_afectada.id_for_label }}" class="form-label">Parte Afectada</label>
+            {{ form.parte_afectada }}
+            {% if form.parte_afectada.errors %}
+              <div class="invalid-feedback d-block">{{ form.parte_afectada.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.tarea.id_for_label }}" class="form-label">Proceso que se Ejecutaba</label>
+            {{ form.tarea }}
+            {% if form.tarea.errors %}
+              <div class="invalid-feedback d-block">{{ form.tarea.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.operacion.id_for_label }}" class="form-label">Operación o Tarea Especifica</label>
+            {{ form.operacion }}
+            {% if form.operacion.errors %}
+              <div class="invalid-feedback d-block">{{ form.operacion.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <h5 class="mb-3">Consecuencias y Contexto</h5>
+
+        <div class="row gy-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label d-block">Daños a Personas</label>
+            <div class="d-flex flex-wrap gap-3">
+              {% for opt in form.danos_personas %}
+                <div class="form-check form-check-inline">
+                  {{ opt.tag }}
+                  <label class="form-check-label" for="{{ opt.id_for_label }}">{{ opt.choice_label }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.danos_personas.errors %}
+              <div class="invalid-feedback d-block">{{ form.danos_personas.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label d-block">Daños a la Propiedad</label>
+            <div class="d-flex flex-wrap gap-3">
+              {% for opt in form.danos_propiedad %}
+                <div class="form-check form-check-inline">
+                  {{ opt.tag }}
+                  <label class="form-check-label" for="{{ opt.id_for_label }}">{{ opt.choice_label }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.danos_propiedad.errors %}
+              <div class="invalid-feedback d-block">{{ form.danos_propiedad.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label d-block">Paralización del Proceso Productivo</label>
+            <div class="d-flex flex-wrap gap-3">
+              {% for opt in form.perdidas_proceso %}
+                <div class="form-check form-check-inline">
+                  {{ opt.tag }}
+                  <label class="form-check-label" for="{{ opt.id_for_label }}">{{ opt.choice_label }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.perdidas_proceso.errors %}
+              <div class="invalid-feedback d-block">{{ form.perdidas_proceso.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12">
+            <label for="{{ form.contexto.id_for_label }}" class="form-label">Describa como es el Proceso Habitual</label>
+            {{ form.contexto }}
+            {% if form.contexto.errors %}
+              <div class="invalid-feedback d-block">{{ form.contexto.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12">
+            <label for="{{ form.circunstancias.id_for_label }}" class="form-label">Descripción del Accidente</label>
+            {{ form.circunstancias }}
+            {% if form.circunstancias.errors %}
+              <div class="invalid-feedback d-block">{{ form.circunstancias.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="submit" class="btn btn-primary-custom">Guardar accidente</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<script>
+  (function () {
+    function isoToday() {
+      const t = new Date();
+      const y = t.getFullYear();
+      const m = String(t.getMonth() + 1).padStart(2, '0');
+      const d = String(t.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    function clampMax() {
+      const sel = '#accidente-form input[type="date"][name="fecha_accidente"]';
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const today = isoToday();
+      el.setAttribute('max', today);
+      if (el.value && el.value > today) {
+        el.value = today; // por si venía una fecha futura
+      }
+    }
+    document.addEventListener('DOMContentLoaded', clampMax);
+    document.body.addEventListener('htmx:afterSwap', function (e) {
+      // re-aplica si el form se re-renderiza por HTMX
+      clampMax();
+    });
+  })();
+</script>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

@@ -1,0 +1,17 @@
+{# Espera: categoria ('accidentado'|'testigo'|'supervision'), slots, codigo #}
+{% load static %}
+<div class="row row-cols-1 row-cols-md-3 g-4"
+     id="grid-{{ categoria }}"
+     hx-swap-oob="outerHTML"
+     hx-indicator="#relato-indicator">
+  {% for slot in slots %}
+    <div class="col">
+      {% include "accidentes/partials/entrevistas/_pregunta_card.html" with slot=slot categoria=categoria codigo=codigo idx=forloop.counter %}
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="empty-state">Sin preguntas.</div></div>
+  {% endfor %}
+</div>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

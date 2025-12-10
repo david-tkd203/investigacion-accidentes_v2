@@ -1,0 +1,11 @@
+{# adminpanel/templates/adminpanel/partials/trabajador/_no_encontrado.html #}
+<div class="alert alert-warning py-2 px-3">
+  <i class="fa-solid fa-triangle-exclamation me-2"></i>
+  No existe trabajador con RUT {{ rut }}.
+  <button class="btn btn-sm btn-outline-primary ms-2"
+          type="button"
+          data-bs-toggle="modal"
+          data-bs-target="#modalNuevoTrabajador">
+    Crear trabajador
+  </button>
+</div>

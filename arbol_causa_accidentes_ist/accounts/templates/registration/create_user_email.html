@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <body style="font-family: Arial, sans-serif; line-height:1.5;">
+    <p>Hola {{ user.get_full_name|default:user.username }},</p>
+    <p>Se ha creado tu usuario en la aplicación <strong>Asistente de investigación de Accidentes de IST</strong>.</p>
+
+    <p>Para comenzar, por favor <strong>establece tu contraseña</strong> con el siguiente enlace seguro:</p>
+    <p>
+      <a href="{{ protocol }}://{{ domain }}{% url 'accounts:password_reset_confirm_accounts' uid token %}">
+        Establecer mi contraseña
+      </a>
+    </p>
+
+    <p>Por seguridad, este enlace vencerá pronto. Si no solicitaste este acceso, puedes ignorar este mensaje.</p>
+
+    <p>Saludos</p>
+  </body>
+</html>

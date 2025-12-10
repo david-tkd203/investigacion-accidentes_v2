@@ -1,0 +1,79 @@
+{# templates/accidentes/partials/docs/_informe_versions.html #}
+<div id="versions-box">
+    <div class="card">s
+        <h2 class="h5 mb-3">Versiones del informe</h2>
+
+        {% if informes %}
+        <div class="list-rows">
+        {% for inf in informes %}
+        <div class="row-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+            <div>
+                <strong>{{ inf.codigo }}</strong> — v{{ inf.version }}
+                {% if inf.is_current %}
+                <span class="badge bg-success ms-1">Actual</span>
+                {% endif %}
+            </div>
+            <div class="muted">
+                Investigador: {{ inf.investigador }} · Fecha: {{ inf.fecha_informe|date:"Y-m-d" }}
+            </div>
+            </div>
+
+            <div class="d-flex gap-2">
+            {# Descargar esta versión: no swap, solo eventos (file-download + informe:updated) #}
+            <form method="post"
+                    action="{% url 'accidentes:generar_informe' codigo %}"
+                    hx-post="{% url 'accidentes:generar_informe' codigo %}"
+                    hx-swap="none"
+                    hx-indicator=".htmx-indicator"
+                    hx-on='file-download: (function(e){
+                    var u = e && e.detail && e.detail.url;
+                    if(!u) return;
+                    try{ window.location.assign(u); } catch(_) { window.location = u; }
+                    })(event)'>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="download">
+                <input type="hidden" name="codigo_informe" value="{{ inf.codigo }}">
+                <input type="hidden" name="version" value="{{ inf.version }}">
+                <button type="submit" class="btn btn-outline-primary btn-sm">Descargar</button>
+            </form>
+
+            {% if not inf.is_current %}
+            <form method="post"
+                    action="{% url 'accidentes:generar_informe' codigo %}"
+                    hx-post="{% url 'accidentes:generar_informe' codigo %}"
+                    hx-target="#versions-box"
+                    hx-swap="outerHTML"
+                    hx-indicator=".htmx-indicator">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="restore">
+                <input type="hidden" name="codigo_informe" value="{{ inf.codigo }}">
+                <input type="hidden" name="from_version" value="{{ inf.version }}">
+                <button type="submit" class="btn btn-warning btn-sm">Restaurar</button>
+            </form>
+            {% endif %}
+
+            <form method="post"
+                    action="{% url 'accidentes:generar_informe' codigo %}"
+                    onsubmit="return confirm('¿Eliminar definitivamente {{ inf.codigo }} v{{ inf.version }}?');"
+                    hx-post="{% url 'accidentes:generar_informe' codigo %}"
+                    hx-target="#versions-box"
+                    hx-swap="outerHTML"
+                    hx-indicator=".htmx-indicator">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="informe_id" value="{{ inf.pk }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
+            </form>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted mb-0">Aún no hay informes generados.</p>
+        {% endif %}
+    </div>
+</div>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

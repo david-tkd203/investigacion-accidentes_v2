@@ -1,0 +1,199 @@
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-1">
+        <i class="fas fa-user me-2" style="color: var(--primary-color);"></i>
+        Información del Trabajador
+        </h5>
+        <p class="card-text text-muted mb-0">Complete los Datos del Trabajador</p>
+    </div>
+
+    <div class="card-body">
+        <form method="post" id="trabajador-form"
+            hx-post="{% url 'accidentes:trabajador' codigo %}"
+            hx-target="#form-container"
+            hx-swap="innerHTML">
+        {% csrf_token %}
+
+        <div class="row gy-3">
+            <div class="col-12 col-md-6">
+            <label for="{{ form.nombre_trabajador.id_for_label }}" class="form-label">Nombre Trabajador</label>
+            {{ form.nombre_trabajador }}
+            {% if form.nombre_trabajador.errors %}
+                <div class="invalid-feedback d-block">{{ form.nombre_trabajador.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12 col-md-6">
+            <label for="{{ form.rut_trabajador.id_for_label }}" class="form-label">RUT Trabajador</label>
+            {{ form.rut_trabajador }}
+            {% if form.rut_trabajador.errors %}
+                <div class="invalid-feedback d-block">{{ form.rut_trabajador.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12 col-md-6">
+            <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">Fecha de Nacimiento</label>
+            {{ form.fecha_nacimiento }}
+            <small class="form-text text-muted">El trabajador debe tener entre 18 y 90 años</small>
+            {% if form.fecha_nacimiento.errors %}
+                <div class="invalid-feedback d-block">{{ form.fecha_nacimiento.errors|striptags }}</div>
+            {% endif %}
+            <div id="edad-warning" class="text-danger small mt-1" style="display:none;"></div>
+            </div>
+
+            <div class="col-12 col-md-6">
+            <label for="{{ form.nacionalidad.id_for_label }}" class="form-label">Nacionalidad</label>
+            {{ form.nacionalidad }}
+            {% if form.nacionalidad.errors %}
+                <div class="invalid-feedback d-block">{{ form.nacionalidad.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12 col-md-6">
+            <label for="{{ form.estado_civil.id_for_label }}" class="form-label">Estado Civil</label>
+            {{ form.estado_civil }}
+            {% if form.estado_civil.errors %}
+                <div class="invalid-feedback d-block">{{ form.estado_civil.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12 col-md-6">
+            <label for="{{ form.domicilio.id_for_label }}" class="form-label">Domicilio Trabajador</label>
+            {{ form.domicilio }}
+            {% if form.domicilio.errors %}
+                <div class="invalid-feedback d-block">{{ form.domicilio.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12 col-md-6">
+            <label for="{{ form.genero.id_for_label }}" class="form-label">Género</label>
+            {{ form.genero }}
+            {% if form.genero.errors %}
+                <div class="invalid-feedback d-block">{{ form.genero.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12">
+            <hr class="my-4">
+            </div>
+
+            <!-- Antigüedad en la Empresa -->
+            <div class="col-12 card-title">
+                <h5 class="mb-3">Antigüedad en la Empresa</h5>
+            </div>
+            <div class="col-12 col-md-6">
+            <label for="{{ form.antiguedad_empresa_anios.id_for_label }}" class="form-label">Años</label>
+            {{ form.antiguedad_empresa_anios }}
+            {% if form.antiguedad_empresa_anios.errors %}
+                <div class="invalid-feedback d-block">{{ form.antiguedad_empresa_anios.errors|striptags }}</div>
+            {% endif %}
+            </div>
+            <div class="col-12 col-md-6">
+            <label for="{{ form.antiguedad_empresa_meses.id_for_label }}" class="form-label">Meses</label>
+            {{ form.antiguedad_empresa_meses }}
+            {% if form.antiguedad_empresa_meses.errors %}
+                <div class="invalid-feedback d-block">{{ form.antiguedad_empresa_meses.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <!-- Antigüedad en el Cargo -->
+            <div class="col-12">
+            <hr class="my-3">
+            </div>
+            <div class="col-12 card-title">
+            <h5 class="mb-3">
+                Antigüedad en el Cargo
+            </h5>
+            </div>
+            <div class="col-12 col-md-6">
+            <label for="{{ form.antiguedad_cargo_anios.id_for_label }}" class="form-label">Años</label>
+            {{ form.antiguedad_cargo_anios }}
+            {% if form.antiguedad_cargo_anios.errors %}
+                <div class="invalid-feedback d-block">{{ form.antiguedad_cargo_anios.errors|striptags }}</div>
+            {% endif %}
+            </div>
+            <div class="col-12 col-md-6">
+            <label for="{{ form.antiguedad_cargo_meses.id_for_label }}" class="form-label">Meses</label>
+            {{ form.antiguedad_cargo_meses }}
+            {% if form.antiguedad_cargo_meses.errors %}
+                <div class="invalid-feedback d-block">{{ form.antiguedad_cargo_meses.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12">
+                <hr class="my-4">
+            </div>
+            <div class="col-12 col-md-6">
+            <label for="{{ form.cargo_trabajador.id_for_label }}" class="form-label">Cargo</label>
+            {{ form.cargo_trabajador }}
+            {% if form.cargo_trabajador.errors %}
+                <div class="invalid-feedback d-block">{{ form.cargo_trabajador.errors|striptags }}</div>
+            {% endif %}
+            </div>
+
+            <div class="col-12 col-md-6">
+            <label for="{{ form.contrato.id_for_label }}" class="form-label">Tipo de Contrato</label>
+            {{ form.contrato }}
+            {% if form.contrato.errors %}
+                <div class="invalid-feedback d-block">{{ form.contrato.errors|striptags }}</div>
+            {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="submit" class="btn btn-primary-custom" id="submit-btn">Guardar Datos</button>
+        </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaNacInput = document.getElementById('{{ form.fecha_nacimiento.id_for_label }}');
+    const warningDiv = document.getElementById('edad-warning');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (fechaNacInput) {
+        fechaNacInput.addEventListener('change', function() {
+            const fechaNac = new Date(this.value);
+            const hoy = new Date();
+            
+            if (!this.value) {
+                warningDiv.style.display = 'none';
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            // Calcular edad
+            let edad = hoy.getFullYear() - fechaNac.getFullYear();
+            const mesActual = hoy.getMonth();
+            const mesNac = fechaNac.getMonth();
+            
+            if (mesActual < mesNac || (mesActual === mesNac && hoy.getDate() < fechaNac.getDate())) {
+                edad--;
+            }
+            
+            // Validar rango de edad
+            if (edad < 18) {
+                warningDiv.textContent = '⚠️ El trabajador debe tener al menos 18 años.';
+                warningDiv.style.display = 'block';
+                submitBtn.disabled = true;
+                this.classList.add('is-invalid');
+            } else if (edad > 90) {
+                warningDiv.textContent = '⚠️ El trabajador no puede tener más de 90 años.';
+                warningDiv.style.display = 'block';
+                submitBtn.disabled = true;
+                this.classList.add('is-invalid');
+            } else {
+                warningDiv.style.display = 'none';
+                submitBtn.disabled = false;
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+});
+</script>
+
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+    {% include "accidentes/notification.html" %}
+{% endif %}

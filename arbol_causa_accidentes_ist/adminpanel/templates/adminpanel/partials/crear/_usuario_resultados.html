@@ -1,0 +1,20 @@
+{# adminpanel/partials/crear/_usuario_resultados.html #}
+<div id="usuario-resultados">
+  {% if usuarios %}
+    {% for u in usuarios %}
+      <button
+        type="button"
+        class="list-group-item list-group-item-action"
+        hx-get="{% url 'adminpanel:usuario_select' %}?id={{ u.id }}"
+        hx-include="#id_empresa, #id_empresa_hidden"   {# pasa empresa actual #}
+        hx-swap="none">                                {# la respuesta es OOB #}
+        <div class="d-flex flex-column">
+          <span class="fw-semibold">{{ u.get_full_name|default:u.username }}</span>
+          <small class="text-muted">{{ u.email }}</small>
+        </div>
+      </button>
+    {% endfor %}
+  {% else %}
+    <div class="list-group-item text-muted">Sin resultados</div>
+  {% endif %}
+</div>

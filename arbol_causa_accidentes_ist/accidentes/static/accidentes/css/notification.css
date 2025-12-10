@@ -1,0 +1,176 @@
+/* Override Bootstrap toast styles*/
+        .toast {
+            background-color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            max-width: 400px !important;
+            margin-bottom: 1rem !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        /* Remove default Bootstrap background colors */
+        .toast.text-bg-success,
+        .toast.text-bg-danger,
+        .toast.text-bg-warning,
+        .toast.text-bg-info {
+            background-color: #ffffff !important;
+            color: #333333 !important;
+        }
+
+        /* Left border colors */
+        .toast.text-bg-success::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #10b981;
+        }
+
+        .toast.text-bg-danger::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #ef4444;
+        }
+
+        .toast.text-bg-warning::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #f59e0b;
+        }
+
+        .toast.text-bg-info::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #3b82f6;
+        }
+
+        /* Toast header styling */
+        .toast-header {
+            background-color: transparent !important;
+            border-bottom: none !important;
+            padding: 1rem 1rem 0.5rem 1.25rem !important;
+            color: #333333 !important;
+            align-items: flex-start !important;
+        }
+
+        /* Icon styling */
+        .toast-header span {
+            width: 24px !important;
+            height: 24px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 12px !important;
+            margin-right: 0.75rem !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Icon colors */
+        .toast.text-bg-success .toast-header span {
+            background-color: #10b981 !important;
+            color: white !important;
+        }
+
+        .toast.text-bg-danger .toast-header span {
+            background-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        .toast.text-bg-warning .toast-header span {
+            background-color: #f59e0b !important;
+            color: white !important;
+        }
+
+        .toast.text-bg-info .toast-header span {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+
+        /* Title styling */
+        .toast-header strong {
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            color: #1f2937 !important;
+            margin: 0 !important;
+        }
+
+        /* Close button positioning */
+        .toast-header .btn-close {
+            position: absolute !important;
+            top: 12px !important;
+            right: 12px !important;
+            margin: 0 !important;
+            opacity: 0.5 !important;
+            width: 16px !important;
+            height: 16px !important;
+        }
+
+        .toast-header .btn-close:hover {
+            opacity: 0.8 !important;
+        }
+
+        /* Toast body styling */
+        .toast-body {
+            padding: 0 1.25rem 1rem 1.25rem !important;
+            color: #6b7280 !important;
+            font-size: 13px !important;
+            line-height: 1.4 !important;
+            margin-left: 36px !important; /* Align with title */
+        }
+
+        /* Demo section styling */
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+
+        .demo-section h3 {
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+
+        /* Replace emoji icons with proper symbols */
+        .toast.text-bg-success .toast-header span::before {
+            content: '✓';
+        }
+
+        .toast.text-bg-danger .toast-header span::before {
+            content: '✕';
+        }
+
+        .toast.text-bg-warning .toast-header span::before {
+            content: '!';
+        }
+
+        .toast.text-bg-info .toast-header span::before {
+            content: 'i';
+        }
+
+        .toast-header span {
+            font-size: 0 !important; /* Hide emoji text */
+        }
+
+        .toast-header span::before {
+            font-size: 12px !important;
+            font-weight: bold !important;
+        }

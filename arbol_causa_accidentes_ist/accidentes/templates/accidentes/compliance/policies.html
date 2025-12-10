@@ -1,0 +1,374 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Políticas de Privacidad y Cumplimiento Legal (Chile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 5 (CDN) -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+    />
+
+    <!-- Estilos -->
+    <link href="{% static 'accidentes/css/policies.css' %}" rel="stylesheet" />
+
+    <style>
+        /* Oculta definitivamente el contenido de una política ya leída */
+        .read-gone { display: none !important; }
+
+        /* Señal visual en el stepper para completadas */
+        .stepper-item.done .stepper-button { opacity: .8; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <!-- Hero -->
+    <section class="policies-hero">
+        <img src="{% static 'accidentes/img/logo_ist.png' %}" alt="IST" class="hero-logo" />
+        <div class="brand-text">
+        <h1 class="title">Políticas de Privacidad y Cumplimiento Legal</h1>
+        <p class="subtitle m-0">
+            <strong>Cómo completar:</strong>
+            <ul class="howto">
+                <li><strong>Abre</strong> una política.</li>
+                <li><strong>Lee</strong> su contenido y <strong>desliza</strong> hasta el final.</li>
+                <li>Se marcará con <strong>✓</strong>, se ocultará y <strong>se abrirá la siguiente</strong>.</li>
+                <li>Al completar todas, <strong>acepta</strong> para continuar.</li>
+            </ul>
+        </p>
+        </div>
+    </section>
+
+    <!-- Progreso + acciones -->
+    <div class="card card-instructions mt-3">
+        <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2 class="h6 m-0">Progreso</h2>
+                <span id="progressText" class="small text-muted">0/0</span>
+            </div>
+            <div class="progress progress-lg" aria-label="Barra de progreso">
+                <div id="progressBar" class="progress-bar" role="progressbar" style="width:0%;" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <p class="small text-muted mt-2 mb-0" id="howTo">
+                Abre una política y baja hasta el final. Verás un ✓ en la lista izquierda.
+                La próxima política se abrirá automáticamente y la anterior se ocultará para no distraer.
+            </p>
+            </div>
+            <div class="col-12 col-lg-4 d-flex flex-wrap gap-2 justify-content-lg-end">
+            <button id="expandAll"   class="btn btn-light btn-sm" type="button">Abrir todo</button>
+            <button id="collapseAll" class="btn btn-light btn-sm" type="button">Cerrar todo</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="row g-3 mt-1">
+        <!-- Stepper -->
+        <aside class="col-12 col-lg-4">
+        <ol class="stepper list-unstyled m-0" id="lawStepper" role="tablist" aria-label="Progreso por políticas">
+            {% for ley in leyes %}
+            <li class="stepper-item {% if forloop.first %}current{% else %}locked{% endif %}"
+                data-index="{{ forloop.counter0 }}"
+                id="step-{{ ley.numero }}"
+                role="tab"
+                aria-selected="{{ forloop.first|yesno:'true,false' }}"
+                aria-disabled="{{ forloop.first|yesno:'false,true' }}">
+            <button class="stepper-button w-100 text-start" type="button" data-bs-target="#acc-{{ ley.numero }}">
+                <span class="stepper-badge">{{ forloop.counter }}</span>
+                <span class="stepper-text">
+                <span class="step-title">Ley {{ ley.numero }}</span>
+                <span class="step-subtitle d-block text-truncate">{{ ley.titulo }}</span>
+                </span>
+                <span class="step-status" aria-hidden="true"></span>
+            </button>
+            </li>
+            {% endfor %}
+        </ol>
+        </aside>
+
+        <!-- Contenido -->
+        <main class="col-12 col-lg-8">
+        <div class="accordion" id="lawAccordion">
+            {% for ley in leyes %}
+            {% with slug=ley.numero|slugify %}
+            <div class="accordion-item panel-card">
+            <h2 class="accordion-header" id="hdr-{{ slug }}">
+                <button class="accordion-button panel-header {% if not forloop.first %}collapsed{% endif %}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#acc-{{ ley.numero }}"
+                        aria-expanded="{{ forloop.first|yesno:'true,false' }}"
+                        aria-controls="acc-{{ ley.numero }}">
+                <div class="panel-headings">
+                    <span class="panel-title">Ley {{ ley.numero }} – {{ ley.titulo }}</span>
+                    <small class="law-meta d-block">
+                    Publicación: <strong>{{ ley.publicacion }}</strong> · Vigencia: <strong>{{ ley.vigencia }}</strong>
+                    </small>
+                </div>
+                </button>
+            </h2>
+
+            <div id="acc-{{ ley.numero }}"
+                class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                role="tabpanel"
+                aria-labelledby="hdr-{{ slug }}"
+                data-index="{{ forloop.counter0 }}">
+                <div class="accordion-body p-0">
+                <div class="policy-scroll" id="panel-{{ ley.numero }}">
+                    {% include ley.template %}
+                    <div class="spacer-24"></div>
+                </div>
+                </div>
+            </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+
+        <!-- Aceptación -->
+        <form class="mt-3 accept-form" method="post" action="{% url 'accidentes:privacy_policies_accept' %}">
+            {% csrf_token %}
+            {% for ley in leyes %}
+            <input type="hidden" name="leyes[]" value="{{ ley.numero }}">
+            {% endfor %}
+
+            <div class="sticky-ack">
+            <div class="divider"></div>
+            <div class="form-check mb-2">
+            <input class="form-check-input custom-lg" type="checkbox" id="accept" name="accept" value="on" disabled>
+            <label class="form-check-label" for="accept">
+                He leído todas las políticas y las acepto.
+            </label>
+            </div>
+            <button id="submitBtn" class="btn btn-accept" type="submit" disabled>Aceptar y continuar</button>
+            <small class="d-block mt-2 text-muted" id="hint">
+                Al completar la lectura de todas las políticas podrás marcar la casilla y continuar.
+            </small>
+            </div>
+        </form>
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script>
+    (() => {
+        // Referencias
+        const stepItems   = Array.from(document.querySelectorAll('.stepper-item'));
+        const stepButtons = Array.from(document.querySelectorAll('.stepper-button'));
+        const accordionEl = document.getElementById('lawAccordion');
+
+        const panels = Array.from(document.querySelectorAll('.policy-scroll')); // snapshot inicial
+        const progressBar  = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const chk  = document.getElementById('accept');
+        const btn  = document.getElementById('submitBtn');
+        const hint = document.getElementById('hint');
+
+        const expandAllBtn   = document.getElementById('expandAll');
+        const collapseAllBtn = document.getElementById('collapseAll');
+
+        const seenBottom = new Map();   // panelId -> boolean
+        const total = panels.length;
+
+        // Utils
+        const atBottom = el => (el.scrollTop + el.clientHeight) >= (el.scrollHeight - 4);
+        const nonScrollable = el => el.scrollHeight <= el.clientHeight + 1;
+        const completedCount = () => panels.reduce((c,p)=> c + (seenBottom.get(p.id) ? 1 : 0), 0);
+
+        const updateProgress = () => {
+            const c = completedCount();
+            const pct = total ? Math.round((c / total) * 100) : 0;
+            progressBar.style.width = pct + '%';
+            progressBar.setAttribute('aria-valuenow', pct);
+            progressText.textContent = `${c}/${total}`;
+        };
+
+        const allReached = () => completedCount() === total;
+
+        const updateAcceptControls = () => {
+            if (allReached()){
+            chk.disabled = false;
+            hint.textContent = "Marca la casilla para habilitar el botón.";
+            } else {
+            chk.checked = false;
+            chk.disabled = true;
+            btn.disabled = true;
+            hint.textContent = "Abre cada política y desliza hasta el final para habilitar la aceptación.";
+            }
+        };
+
+        const setStepCompleted = (index, completed) => {
+            const li = stepItems[index];
+            if (!li) return;
+            li.classList.remove('current');
+            if (completed) {
+            li.classList.add('done');
+            const s = li.querySelector('.step-status');
+            if (s) s.textContent = '✓';
+            } else {
+            li.classList.remove('done');
+            const s = li.querySelector('.step-status');
+            if (s) s.textContent = '';
+            }
+        };
+
+        const unlockNext = (index) => {
+            const next = stepItems[index + 1];
+            if (!next) return;
+            next.classList.remove('locked');
+            next.setAttribute('aria-disabled','false');
+        };
+
+        const scrollPanelTop = (panel) => {
+            try { panel?.scrollTo({ top: 0, behavior: 'instant' }); } catch (_) {
+            if (panel) panel.scrollTop = 0;
+            }
+        };
+
+        const showIndex = (index) => {
+            if (index < 0 || index >= stepItems.length) return;
+
+            // bloqueado → no abrir
+            if (stepItems[index].classList.contains('locked')) {
+            const prev = stepItems[index-1];
+            prev?.classList.add('pulse'); setTimeout(()=>prev?.classList.remove('pulse'), 700);
+            return;
+            }
+
+            const targetId = stepButtons[index]?.getAttribute('data-bs-target');
+            if (!targetId) return;
+            const collapseEl = document.querySelector(targetId);
+            if (!collapseEl) return;
+
+            // abrir acordeón del índice
+            const c = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle:false });
+            c.show();
+
+            // marcar “current” en stepper
+            stepItems.forEach(li => li.classList.remove('current'));
+            stepItems[index].classList.add('current');
+
+            // asegurar que el panel comienza arriba
+            const panel = document.querySelector(`${targetId} .policy-scroll`);
+            scrollPanelTop(panel);
+
+            // si el panel no hace scroll, marcar como leído
+            if (panel && !seenBottom.get(panel.id) && nonScrollable(panel)) {
+            seenBottom.set(panel.id, true);
+            setStepCompleted(index, true);
+            updateProgress(); updateAcceptControls();
+            unlockNext(index);
+            // ocultar contenido de la ya "leída" (aunque sea corta) y pasar a la siguiente
+            hideCollapseAndOpenNext(collapseEl, index);
+            }
+        };
+
+        const findNextIndex = (fromIndex) => {
+            for (let i = fromIndex + 1; i < stepItems.length; i++) {
+            if (!stepItems[i].classList.contains('locked') && !stepItems[i].classList.contains('done')) {
+                return i;
+            }
+            }
+            // si no hay pendientes, abre la siguiente visual si existe
+            return (fromIndex + 1 < stepItems.length) ? fromIndex + 1 : -1;
+        };
+
+        const hideCollapseAndOpenNext = (collapseEl, idx) => {
+            // Al ocultar, una vez colapsado, lo marcamos como read-gone (desaparece)
+            const onHidden = () => {
+            collapseEl.removeEventListener('hidden.bs.collapse', onHidden);
+            };
+            collapseEl.addEventListener('hidden.bs.collapse', onHidden, { once:true });
+
+            const ci = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle:false });
+            ci.hide();
+
+            // Abrir siguiente disponible
+            const nextIdx = findNextIndex(idx);
+            if (nextIdx !== -1) {
+            showIndex(nextIdx);
+            }
+        };
+
+        // init estado
+        panels.forEach(p => seenBottom.set(p.id, false));
+        updateProgress(); updateAcceptControls();
+
+        // marcar completado al hacer scroll hasta el fondo
+        document.querySelectorAll('.policy-scroll').forEach((p) => {
+            p.addEventListener('scroll', () => {
+            if (!seenBottom.get(p.id) && atBottom(p)) {
+                seenBottom.set(p.id, true);
+                const collapseEl = p.closest('.accordion-collapse');
+                const idx = Number(collapseEl.dataset.index);
+                setStepCompleted(idx, true);
+                updateProgress(); updateAcceptControls();
+                unlockNext(idx);
+                // al terminar, ocultar contenido actual y abrir la siguiente
+                hideCollapseAndOpenNext(collapseEl, idx);
+            }
+            }, { passive:true });
+        });
+
+        // sincronizar stepper al abrir acordeón
+        accordionEl.addEventListener('show.bs.collapse', (e) => {
+            const idx = Number(e.target.dataset.index);
+            stepItems.forEach(li => li.classList.remove('current'));
+            stepItems[idx]?.classList.add('current');
+        });
+
+        // clicks en stepper
+        stepButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+            const idx = Number(btn.parentElement.dataset.index);
+            showIndex(idx);
+            });
+        });
+
+        // Abrir / cerrar todo (nota: si una política está completada y sin scroll, también la ocultamos)
+        expandAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('.accordion-collapse').forEach(el => {
+            if (el.classList.contains('read-gone')) return; // ya oculta
+            const c = bootstrap.Collapse.getOrCreateInstance(el, { toggle:false });
+            c.show();
+            const idx = Number(el.dataset.index);
+            const panel = el.querySelector('.policy-scroll');
+            if (panel && !seenBottom.get(panel.id) && nonScrollable(panel)) {
+                seenBottom.set(panel.id, true);
+                setStepCompleted(idx, true);
+                unlockNext(idx);
+                // ocultar inmediatamente porque no tiene scroll
+                hideCollapseAndOpenNext(el, idx);
+            }
+            });
+            updateProgress(); updateAcceptControls();
+        });
+
+        collapseAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('.accordion-collapse').forEach(el => {
+            if (el.classList.contains('read-gone')) return; // ya oculta
+            const c = bootstrap.Collapse.getOrCreateInstance(el, { toggle:false });
+            c.hide();
+            });
+        });
+
+        // aceptación
+        chk.addEventListener('change', () => { btn.disabled = !chk.checked; });
+    })();
+</script>
+</body>
+</html>

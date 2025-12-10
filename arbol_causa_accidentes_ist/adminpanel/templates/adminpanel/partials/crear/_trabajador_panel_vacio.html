@@ -1,0 +1,6 @@
+<div class="alert alert-light border mb-0">
+  Ingresa el RUT para buscar al trabajador. Si no existe, podrás crearlo.
+</div>
+
+{# OOB: al llegar por HTMX, limpia el hidden real del form #}
+<input type="hidden" name="trabajador_id" id="id_trabajador_id" value="" hx-swap-oob="true">

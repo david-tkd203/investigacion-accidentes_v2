@@ -1,0 +1,184 @@
+{% extends "accidentes/base.html" %}
+{% load static %}
+
+{% block title %}Fotos y Documentos{% endblock %}
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 1200px;">
+  <div class="titular-page">
+    <div class="card-header">
+      <h5 class="card-title mb-1">
+        <i class="fa-solid fa-folder-open me-2" style="color: var(--primary-color);"></i>
+        Fotos y Documentos
+      </h5>
+      <p class="card-text text-muted mb-0">Gestiona toda la documentación en una sola vista</p>
+    </div>
+  </div>
+
+  {% include "accidentes/includes/disclaimer.html" %}
+
+  <div class="d-flex justify-content-start align-items-center gap-4 mb-3">
+    <h2 class="h4 mb-0">Documentos</h2>
+    <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#addFreeDocModal">
+      <i class="fa-solid fa-plus me-1"></i> Añadir documento
+    </button>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-3 g-4" id="grid-documentos">
+    {% for item in items %}
+      <div class="col" id="doc-{{ item.pk }}">
+        {% include "accidentes/partials/docs/_doc_card.html" with item=item codigo=codigo %}
+      </div>
+    {% endfor %}
+    
+    {# Placeholder DENTRO del grid como col-12 para que OOB beforeend funcione #}
+    {% if not items %}
+      <div class="col-12" id="empty-docs">
+        <div class="empty-state text-center py-4">
+          <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No hay documentos aún. Utiliza el botón "Añadir documento" para comenzar.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Botón "Guardar todo" aparece solo cuando hay documentos #}
+  {% if items %}
+    <div class="d-flex justify-content-start mt-4" id="final-action-section">
+      <form method="post" action="{% url 'accidentes:ia_fotos' codigo %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_all">
+        <input type="hidden" name="anchor" value="final-action-section">
+        <button type="submit" class="btn btn-primary-custom">Guardar todo</button>
+      </form>
+    </div>
+  {% endif %}
+
+  {# Indicador de carga para acciones HTMX de esta vista #}
+  <div id="docs-indicator" class="htmx-indicator text-center my-3" aria-live="polite">
+    <div class="spinner-border" role="status" aria-hidden="true"></div>
+    <span class="ms-2">Procesando…</span>
+  </div>
+
+  {# ===== Modal: Añadir documento (HTMX) ===== #}
+  <div class="modal fade" id="addFreeDocModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <form id="add-free-form"
+            hx-post="{% url 'accidentes:ia_fotos' codigo %}"
+            hx-target="#grid-documentos"
+            hx-swap="beforeend"
+            hx-encoding="multipart/form-data"
+            hx-indicator="#docs-indicator">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_free_docs">
+        <input type="hidden" name="anchor" value="grid-documentos">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Añadir documento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-2">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Documento</label>
+                <input type="text" name="doc_title" class="form-control" placeholder="Nombre (opcional)">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Objetivo</label>
+                <input type="text" name="doc_objective" class="form-control" placeholder="Objetivo (opcional)">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Enlace URL</label>
+                <input type="url" name="doc_url" class="form-control" placeholder="http://... (opcional)">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Documento digital</label>
+                <input type="file" name="doc_file" class="form-control">
+              </div>
+            </div>
+            <p class="text-muted small mt-2">Debe ingresar URL o Archivo (no ambos).</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary-custom">Guardar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  // Validación modal: URL XOR Archivo
+  document.getElementById('add-free-form')?.addEventListener('submit', function(e) {
+    const urlInput  = this.querySelector('input[name="doc_url"]');
+    const fileInput = this.querySelector('input[name="doc_file"]');
+    const urlFilled  = urlInput.value.trim() !== '';
+    const fileFilled = fileInput.files.length > 0;
+
+    if (!urlFilled && !fileFilled) {
+      alert("Debe ingresar una URL o subir un archivo."); e.preventDefault(); return;
+    }
+    if (urlFilled && fileFilled) {
+      alert("No puede ingresar URL y subir archivo a la vez."); e.preventDefault(); return;
+    }
+  });
+</script>
+<script>
+  // Cerrar modal y resetear formulario después de agregar documento
+  document.body.addEventListener('doc-added', function () {
+    const modalEl = document.getElementById('addFreeDocModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.hide();
+      
+      // Resetear formulario después de cerrar el modal
+      setTimeout(() => {
+        const form = document.getElementById('add-free-form');
+        if (form) {
+          form.reset();
+        }
+      }, 300); // Esperar a que el modal termine de cerrarse
+    }
+  });
+
+  // Asegurar que el formulario se resetea al cerrar el modal manualmente
+  document.getElementById('addFreeDocModal')?.addEventListener('hidden.bs.modal', function () {
+    const form = document.getElementById('add-free-form');
+    if (form) {
+      form.reset();
+    }
+  });
+</script>
+<style>
+  /* Alineación general del header */
+  #grid-documentos .card .card-body > .d-flex.justify-content-between.align-items-start {
+    gap: .5rem;
+  }
+
+  /* Acciones inferiores (abrir/descargar + limpiar) con buen reparto */
+  #grid-documentos .doc-actions .action-primary,
+  #grid-documentos .doc-actions .action-secondary {
+    width: 100%;
+  }
+  @media (min-width: 576px) {
+    #grid-documentos .doc-actions .action-primary,
+    #grid-documentos .doc-actions .action-secondary {
+      flex: 0 1 50%;
+    }
+  }
+
+  /* Evitar saltos feos en textos largos */
+  #grid-documentos h6,
+  #grid-documentos p,
+  #grid-documentos .form-control {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+</style>
+{% endblock %}

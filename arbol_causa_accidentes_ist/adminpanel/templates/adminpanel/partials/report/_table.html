@@ -1,0 +1,133 @@
+{% load static %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+        <strong>Resultados</strong>
+        <small class="text-muted ms-2">
+            {{ paginator.count }} caso{{ paginator.count|pluralize:"s" }}
+            {% if date_from or date_to %}
+            · Rango: {{ date_from|default:"(sin inicio)" }} → {{ date_to|default:"(sin fin)" }}
+            {% endif %}
+            · Base: {% if date_kind == 'creacion' %}Fecha de creación{% else %}Fecha de accidente{% endif %}
+        </small>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+        <label class="small text-muted">Filas por página</label>
+        <select
+            class="form-select form-select-sm"
+            style="width:auto"
+            name="page_size"
+            hx-get="{% url 'adminpanel:report_excel_table' %}"
+            hx-target="#report-table"
+            hx-indicator=".htmx-indicator"
+            hx-include="[name='date_from'], [name='date_to'], [name='date_kind'], [name='holding_id'], [name='empresa_id'], [name='investigador_id'], [name='coordinador_id']"
+            hx-on="change: this.setAttribute('hx-vals', JSON.stringify({page: 1}))"
+        >
+            <option value="10"  {% if page_size|stringformat:"s" == "10"  %}selected{% endif %}>10</option>
+            <option value="25"  {% if page_size|stringformat:"s" == "25"  %}selected{% endif %}>25</option>
+            <option value="50"  {% if page_size|stringformat:"s" == "50"  %}selected{% endif %}>50</option>
+            <option value="100" {% if page_size|stringformat:"s" == "100" %}selected{% endif %}>100</option>
+            <option value="200" {% if page_size|stringformat:"s" == "200" %}selected{% endif %}>200</option>
+        </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+            <th>Código</th>
+            <th>Empresa</th>
+            <th>Centro</th>
+            <th>Trabajador</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Investigador</th>
+            <th>Creador</th>
+            <th class="text-center">Informe</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj.object_list %}
+            {% for a in page_obj.object_list %}
+                <tr>
+                <td class="fw-semibold">{{ a.codigo_accidente }}</td>
+                <td>
+                    {{ a.empresa.empresa_sel|default:"—" }}<br>
+                    <small class="text-muted">{{ a.empresa.holding.nombre|default:"" }}</small>
+                </td>
+                <td>{{ a.centro.nombre_local|default:"—" }}</td>
+                <td>
+                    {{ a.trabajador.nombre_trabajador|default:"—" }}<br>
+                    <small class="text-muted">{{ a.trabajador.rut_trabajador|default:"" }}</small>
+                </td>
+                <td>{{ a.fecha_accidente|date:"Y-m-d" }}</td>
+                <td>
+                    {% if a.hora_accidente %}
+                    {{ a.hora_accidente|stringformat:"s"|slice:":5" }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+                <td>
+                    {{ a.usuario_asignado.get_full_name|default:a.usuario_asignado.username|default:"—" }}
+                </td>
+                <td>
+                    {{ a.creado_por.get_full_name|default:a.creado_por.username|default:"—" }}
+                </td>
+                <td class="text-center">
+                    {% if a.tiene_informe %}
+                    <span class="badge text-bg-success">Sí</span>
+                    {% else %}
+                    <span class="badge text-bg-secondary">No</span>
+                    {% endif %}
+                </td>
+                </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center text-muted py-4">
+                No hay resultados para los filtros seleccionados.
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+        </table>
+    </div>
+
+    {% if paginator.num_pages > 1 %}
+        <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="small text-muted">
+            Página {{ page_obj.number }} de {{ paginator.num_pages }}
+        </div>
+        <nav class="d-flex gap-1">
+            {% if page_obj.has_previous %}
+            <button
+                class="btn btn-outline-secondary btn-sm"
+                hx-get="{% url 'adminpanel:report_excel_table' %}?page={{ page_obj.previous_page_number }}&page_size={{ page_size }}&date_from={{ date_from }}&date_to={{ date_to }}&date_kind={{ date_kind }}&holding_id={{ request.GET.holding_id }}&empresa_id={{ request.GET.empresa_id }}&investigador_id={{ request.GET.investigador_id }}&coordinador_id={{ request.GET.coordinador_id }}"
+                hx-target="#report-table"
+                hx-indicator=".htmx-indicator"
+            >
+                « Anterior
+            </button>
+            {% else %}
+            <button class="btn btn-outline-secondary btn-sm" disabled>« Anterior</button>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+            <button
+                class="btn btn-outline-secondary btn-sm"
+                hx-get="{% url 'adminpanel:report_excel_table' %}?page={{ page_obj.next_page_number }}&page_size={{ page_size }}&date_from={{ date_from }}&date_to={{ date_to }}&date_kind={{ date_kind }}&holding_id={{ request.GET.holding_id }}&empresa_id={{ request.GET.empresa_id }}&investigador_id={{ request.GET.investigador_id }}&coordinador_id={{ request.GET.coordinador_id }}"
+                hx-target="#report-table"
+                hx-indicator=".htmx-indicator"
+            >
+                Siguiente »
+            </button>
+            {% else %}
+            <button class="btn btn-outline-secondary btn-sm" disabled>Siguiente »</button>
+            {% endif %}
+        </nav>
+        </div>
+    {% endif %}
+</div>

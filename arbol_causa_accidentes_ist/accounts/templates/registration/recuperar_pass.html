@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/x-icon" href="{% static 'accidentes/img/favicon-ist.ico' %}">
+  <title>Recuperar contraseña - IST</title>
+  <link rel="stylesheet" href="{% static 'accidentes/css/login.css' %}">
+</head>
+<body>
+  <div class="login-container">
+    <div class="header">
+      <img src="{% static 'img/logo_ist.png' %}" alt="IST Logo" class="logo">
+      <h1 class="app-title">Asistente de investigación de accidentes del trabajo</h1>
+    </div>
+
+    <div class="form-section">
+      <h2 class="section-title">Recuperar contraseña</h2>
+      <p class="instructions">
+        Ingresa tu RUT; si existe una cuenta activa, enviaremos un enlace al correo asociado.
+      </p>
+
+      {% if form.non_field_errors %}
+        <div class="error-message" role="alert">
+          {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'accounts:password_reset' %}" id="resetForm" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="{{ form.rut.id_for_label }}" class="form-label">RUT</label>
+          {{ form.rut }}
+          {% if form.rut.errors %}
+            <div class="field-errors">
+              {% for e in form.rut.errors %}{{ e }}{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="login-button" id="resetBtn">Enviar enlace</button>
+        <a href="{% url 'accounts:login' %}" class="forgot-password">Volver al inicio de sesión</a>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

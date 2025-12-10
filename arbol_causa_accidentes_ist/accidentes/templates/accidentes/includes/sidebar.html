@@ -1,0 +1,117 @@
+{% load adminpanel_extras %}
+<aside class="custom-sidebar d-flex flex-column" id="sidebar">
+    <a href="{% url 'accidentes:home' %}" class="sidebar-brand">
+        <div class="sidebar-brand-icon"></div>
+        <div>
+        <div class="fw-semibold">Asistente de Investigación</div>
+        <div style="font-size: 0.75rem; opacity: 0.8;">de Accidentes Laborales</div>
+        </div>
+    </a>
+
+    <div class="sidebar-nav flex-grow-1">
+        <div class="sidebar-nav-label">Navegación</div>
+        <ul class="list-unstyled mb-0">
+        <li>
+            <a href="{% url 'accidentes:home' %}"
+            class="sidebar-nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <i class="fas fa-home sidebar-nav-icon"></i>
+            <span>Mis casos</span>
+            </a>
+        </li>
+
+        {% if acc_menu_visible %}
+            <li>
+                <a href="{% url 'accidentes:empresa' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'empresa' %}active{% endif %}">
+                <i class="fas fa-building sidebar-nav-icon"></i>
+                <span>Datos empresa</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:trabajador' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'trabajador' %}active{% endif %}">
+                <i class="fas fa-user sidebar-nav-icon"></i>
+                <span>Datos trabajador</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:accidente' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'accidente' %}active{% endif %}">
+                <i class="fas fa-exclamation-triangle sidebar-nav-icon"></i>
+                <span>Datos accidente</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:ia_declaraciones' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'ia_declaraciones' %}active{% endif %}">
+                <i class="fas fa-comments sidebar-nav-icon"></i>
+                <span>Asistente de entrevistas</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:ia_fotos' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'ia_fotos' %}active{% endif %}">
+                <i class="fas fa-camera sidebar-nav-icon"></i>
+                <span>Fotos y documentos</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:ia_relato' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'ia_relato' %}active{% endif %}">
+                <i class="fas fa-file-alt sidebar-nav-icon"></i>
+                <span>Construcción del relato</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:ia_hechos' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'ia_hechos' %}active{% endif %}">
+                <i class="fas fa-search sidebar-nav-icon"></i>
+                <span>Análisis de hechos</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:ia_arbol' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'ia_arbol' %}active{% endif %}">
+                <i class="fas fa-code-branch sidebar-nav-icon"></i>
+                <span>Árbol de causas</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:ia_medidas' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'ia_medidas' %}active{% endif %}">
+                <i class="fas fa-shield-alt sidebar-nav-icon"></i>
+                <span>Medidas correctivas</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accidentes:generar_informe' codigo %}"
+                class="sidebar-nav-link {% if request.resolver_match.url_name == 'generar_informe' %}active{% endif %}">
+                <i class="fas fa-file-export sidebar-nav-icon"></i>
+                <span>Generar informe</span>
+                </a>
+            </li>
+        {% endif %}
+        </ul>
+    </div>
+    {% if request.user|has_admin_access %}
+        <div class="p-3">
+            <a href="{% url 'adminpanel:home' %}"
+            class="btn-logout w-100 d-flex align-items-center mb-2">
+                <i class="fa-solid fa-gear me-2 logout-icon"></i>
+                <span class="fw-semibold">Administración</span>
+            </a>
+        </div>
+    {% endif %}
+
+    {% if request.user.is_authenticated %}
+        <div class="p-3 logout-container">
+        <form action="{% url 'accounts:logout' %}" method="post" class="d-grid">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout w-100 d-flex align-items-center">
+            <i class="fas fa-right-from-bracket me-2 logout-icon"></i>
+            <span class="fw-semibold">Cerrar sesión</span>
+            </button>
+        </form>
+        </div>
+    {% endif %}
+</aside>

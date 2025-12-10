@@ -1,0 +1,41 @@
+{% extends "accidentes/base.html" %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 1200px;">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <i class="fas fa-tree fs-3" style="color: var(--primary-color);"></i>
+    <h1 class="mb-0">Árbol de Causas</h1>
+  </div>
+
+    {% include "accidentes/includes/disclaimer.html" %}
+
+    <div id="arbol-container"
+         hx-get="{% url 'accidentes:ia_arbol' codigo %}"
+         hx-trigger="load"
+         hx-target="#arbol-container"
+         hx-swap="innerHTML"
+         hx-indicator="#relato-indicator">
+      <!-- El contenido se cargará dinámicamente con HTMX -->
+    </div>
+  </div>
+
+  <!-- Indicador global para acciones HTMX en esta vista -->
+  <div id="relato-indicator" class="htmx-indicator text-center my-3" aria-live="polite">
+    <div class="spinner-border" role="status" aria-hidden="true"></div>
+    <span class="ms-2">Procesando…</span>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  // Header CSRF para todas las solicitudes HTMX de esta página
+  document.body.addEventListener('htmx:configRequest', (event) => {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput && csrfInput.value) {
+      event.detail.headers['X-CSRFToken'] = csrfInput.value;
+    }
+  });
+</script>
+{% endblock %}
+</div>

@@ -1,0 +1,276 @@
+/* ===================== THEME ===================== */
+:root{
+    --primary:#3b2a78; --primary-600:#2e215e; --primary-soft:#ede9fe;
+    --warning:#f59e0b; --warning-soft:#fff3d6;
+    --danger:#dc2626; --success:#16a34a;
+    --surface:#fff; --surface-2:#fafafa;
+    --text:#1f2937; --text-soft:#6b7280;
+    --radius-xl:16px; --radius-md:12px;
+    --shadow:0 6px 18px rgba(17,24,39,.08);
+    --shadow-soft:0 2px 8px rgba(17,24,39,.06);
+    --gap:24px; --font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+
+    /* Perillas (puedes ajustar) */
+    --body-top-gap:22px;         /* espacio bajo el H1 */
+    --grid-gap:24px;             /* separación entre tarjetas */
+    --card-min-height:180px;     /* alto mínimo de tarjeta */
+    --base-font:1.05rem;         /* tamaño del párrafo */
+
+    /* Control de anchos: */
+    --card-max-width: min(1100px, 100%); /* ajustado para no dejar franjas vacías */
+    --content-pad-x: 28px;       /* ⬅ padding lateral del contenido */
+}
+
+/* ===================== RESET / LAYOUT ===================== */
+html, body {
+    height:100%;
+    margin:0;
+}
+body{
+    overflow-y: scroll;          /* un único scroll vertical */
+    overflow-x: hidden;          /* evita scroll horizontal */
+    scrollbar-gutter: stable;
+    box-sizing:border-box;
+    background: #fff;
+}
+*, *::before, *::after { box-sizing:inherit; }
+
+/* Contenedor “de página” que ocupa TODA la altura visible */
+.page-bleed{
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding-left:var(--content-pad-x);
+    padding-right:0; /* evita franja vacía a la derecha */
+}
+
+/* Contenido principal */
+.main-content{
+    margin:0 auto;
+    flex:1;
+}
+
+.main-content h1{
+    font-family:var(--font);
+    color:var(--primary);
+    font-weight:600;
+    font-size:clamp(1.4rem,1.9vw,2.1rem);
+    letter-spacing:.2px;
+    margin:0 0 var(--body-top-gap);
+}
+
+/* ===================== LISTA EN FILAS ===================== */
+.medidas-list{
+    display:flex;
+    flex-direction:column;
+    gap: var(--grid-gap);
+    list-style:none;
+    padding:0;
+    margin:0;
+    width:100%;
+}
+.medidas-list > li { margin:0; min-width:0; width:100%; }
+
+/* ===================== TARJETA ===================== */
+.medida-item{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    background:var(--surface);
+    border:1px solid #eee;
+    border-radius:var(--radius-xl);
+    box-shadow:var(--shadow);
+    padding:20px 18px 18px;
+    position:relative;
+    min-height:var(--card-min-height);
+    width:100%;
+    max-width:var(--card-max-width);
+    margin-inline:auto;
+    transition:transform .15s ease, box-shadow .2s ease;
+}
+.medida-item:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 22px rgba(17,24,39,.12);
+}
+
+/* Acento lateral por prioridad */
+.medida-item[data-priority="Alta"]::before,
+.medida-item[data-priority="Media"]::before,
+.medida-item[data-priority="Baja"]::before{
+    content:"";
+    position:absolute;
+    inset:0 0 0 auto;
+    width:4px;
+    border-radius:0 var(--radius-xl) var(--radius-xl) 0;
+}
+.medida-item[data-priority="Alta"]::before{ background:var(--danger); }
+.medida-item[data-priority="Media"]::before{ background:var(--warning); }
+.medida-item[data-priority="Baja"]::before{ background:var(--success); }
+
+/* ===================== CHIPS (TIPO + PRIORIDAD) ===================== */
+.chips{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    height:28px;
+    padding:0 10px;
+    border-radius:9999px;
+    font-family:var(--font);
+    font-weight:700;
+    font-size:.92rem;
+    white-space:nowrap;
+    width:fit-content;
+    max-width:100%;
+}
+.badge.tipo{
+    background:var(--primary);
+    color:#fff;
+    box-shadow:var(--shadow-soft);
+}
+.badge.prioridad{
+    background:var(--warning-soft);
+    color:var(--warning);
+}
+
+/* ===================== FECHA + RESPONSABLE ===================== */
+.detalle{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+}
+.detalle .fecha,
+.detalle .responsable{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    height:32px;
+    background:var(--surface-2);
+    border:1px solid #ececec;
+    border-radius:10px;
+    color:var(--text);
+    font-weight:600;
+    box-shadow:var(--shadow-soft);
+    width:fit-content;
+    max-width:100%;
+}
+
+/* ===================== TEXTO ===================== */
+.descripcion{
+    margin:6px 0 8px;
+    color:var(--text);
+    font-family:var(--font);
+    line-height:1.7;
+    font-size:var(--base-font);
+}
+
+/* ===================== FORM (edición) ===================== */
+.field-group{ width:100%; }
+.field-group label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:700;
+    color:var(--text);
+    font-family:var(--font);
+}
+.field-group select,
+.field-group textarea,
+.field-group input[type="date"],
+.field-group input[type="text"]{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid #e5e7eb;
+    border-radius:var(--radius-md);
+    font-family:var(--font);
+    font-size:1rem;
+    outline:none;
+    background:#fff;
+    transition:border-color .2s ease, box-shadow .2s ease;
+}
+.field-group textarea{ min-height:110px; resize:vertical; }
+.field-group select:focus,
+.field-group textarea:focus,
+.field-group input:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 4px rgba(59,42,120,.12);
+}
+
+.medida-item .mc-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+.detalle.mc-edit{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+/* ===================== BOTONES ===================== */
+.btn-guardar, .btn-edit{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    height:44px;
+    padding:0 22px;
+    border-radius:12px;
+    font-family:var(--font);
+    font-weight:800;
+    cursor:pointer;
+    border:none;
+    transition:transform .1s ease, filter .2s ease;
+    box-shadow:var(--shadow-soft);
+    margin-top:auto;
+    width:fit-content;
+}
+.btn-guardar{
+    background:var(--primary);
+    color:#fff;
+}
+.btn-guardar:hover{
+    filter:brightness(.95);
+    transform:translateY(-1px);
+}
+.btn-guardar:active{ transform:translateY(0); }
+.btn-edit{
+    background:var(--primary-soft);
+    color:var(--primary);
+    border:2px solid var(--primary);
+}
+.btn-edit:hover{
+    background:var(--primary);
+    color:#fff;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width:1024px){
+    .page-bleed{ padding-left:22px; padding-right:22px; }
+    .medidas-list{ gap:20px; }
+}
+@media (max-width:640px){
+    .medida-item{ padding:18px 14px 16px; }
+    .descripcion{ font-size:1rem; }
+    .medida-item .mc-row, .detalle.mc-edit{ grid-template-columns:1fr; }
+    .btn-guardar, .btn-edit{ width:100%; }
+}
+
+/* ===================== FIX extra para un solo scroll ===================== */
+.page-bleed,
+.main-content,
+.medidas-list{
+    height: auto !important;
+    overflow: visible !important;
+}
+.layout-content, .content-wrapper, .app-content{
+    overflow: visible !important;
+    height: auto !important;
+}

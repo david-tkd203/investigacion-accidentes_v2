@@ -1,0 +1,61 @@
+{# accidentes/partials/_pregunta_card.html #}
+
+
+<form method="post" action="{% url 'accidentes:ia_declaraciones' codigo %}#{{ categoria }}">
+  {% csrf_token %}
+  <input type="hidden" name="anchor" value="{{ categoria }}">
+  <input type="hidden" name="slot_pk" value="{{ slot.pk }}">
+
+  <div class="card question-card h-100">
+    <div class="card-body d-flex flex-column gap-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <span class="text-muted small">Pregunta</span>
+          <span class="question-number">{{ idx|default:forloop.counter }}</span>
+        </div>
+
+        {# --- ELIMINAR con HTMX (sin recargar) --- #}
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-danger delete-btn d-inline-flex align-items-center gap-1"
+          hx-post="{% url 'accidentes:ia_declaraciones' codigo %}#{{ categoria }}"
+          hx-vals='{"action":"delete"}'
+          hx-include="closest form"
+          hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+          hx-target="closest .col"
+          hx-swap="delete"
+          hx-confirm="¿Eliminar esta pregunta definitivamente?"
+          hx-indicator="#relato-indicator">
+          <i class="fa-solid fa-trash-can"></i>
+          <span class="d-inline d-sm-none ms-1">Eliminar</span>
+          <span class="d-none d-sm-inline ms-1">Eliminar pregunta</span>
+        </button>
+        </div>
+
+      <h6 class="mb-1">{{ slot.pregunta|default:"(Sin pregunta)" }}</h6>
+      {% if slot.objetivo %}
+        <p class="text-muted small mb-0">{{ slot.objetivo }}</p>
+      {% endif %}
+
+      <textarea name="respuesta" class="form-control" rows="5">{{ slot.respuesta }}</textarea>
+
+      <div class="mt-auto d-flex justify-content-end">
+        <button
+            type="button"
+            class="btn btn-primary-custom btn-sm"
+            hx-post="{% url 'accidentes:ia_declaraciones' codigo %}#{{ categoria }}"
+            hx-include="closest form"
+            hx-vals='{"action":"save_single"}'
+            hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'
+            hx-swap="none"
+            hx-indicator="#relato-indicator"
+          >
+            Guardar respuesta
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+{% if request.META.HTTP_HX_REQUEST or is_htmx %}
+  {% include "accidentes/notification.html" %}
+{% endif %}

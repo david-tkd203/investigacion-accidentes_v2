@@ -1,0 +1,55 @@
+{# accidentes/templates/accidentes/hechos.html #}
+{% extends "accidentes/base.html" %}
+{% load static %}
+
+{% block title %}Gestión de Hechos del Accidente{% endblock %}
+
+{% block extra_css %}
+<!--<link rel="stylesheet" href="{% static 'accidentes/css/hechos.css' %}">-->
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4 p-md-5">
+  <div class="mx-auto" style="max-width: 1200px;">
+    <!-- Título -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <i class="fas fa-search fs-3" style="color: var(--primary-color);"></i>
+      <h1 class="h2 mb-0">Gestión de Hechos del Accidente</h1>
+    </div>
+
+    {% include "accidentes/includes/disclaimer.html" %}
+
+    <!-- Wrapper HTMX -->
+    <div id="hechos-wrapper">
+      {% include "accidentes/partials/hechos/_hechos_wrapper.html" %}
+    </div>
+
+    <!-- Indicador de carga para peticiones HTMX -->
+    <div id="relato-indicator" class="htmx-indicator text-center my-3" aria-live="polite">
+      <div class="spinner-border" role="status" aria-hidden="true"></div>
+      <span class="ms-2">Procesando…</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  // Auto-resize simple para textareas
+  function autosize(el){ el.style.height='auto'; el.style.height=(el.scrollHeight+4)+'px'; }
+  function autosizeAll(){ document.querySelectorAll('#hechos-wrapper textarea').forEach(autosize); }
+  document.addEventListener('input', (e)=>{ if(e.target.matches('#hechos-wrapper textarea')) autosize(e.target); });
+  document.addEventListener('DOMContentLoaded', autosizeAll);
+  document.body.addEventListener('htmx:afterSwap', autosizeAll);
+</script>
+<script>
+  // Tooltips Bootstrap
+  document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+{% endblock %}

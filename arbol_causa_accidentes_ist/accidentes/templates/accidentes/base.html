@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Investigación de Accidentes{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'accidentes/img/favicon-ist.ico' %}">
+    <!-- Vendor -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Estilos globales del proyecto -->
+    <link rel="stylesheet" href="{% static 'accidentes/css/base.css' %}">
+    {# <link rel="stylesheet" href="{% static 'accidentes/css/notification.css' %}"> #}
+
+    <!-- Estilos por página -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="has-sidebar d-flex flex-nowrap">
+        {% include 'accidentes/includes/sidebar.html' %}
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <main class="main-content flex-grow-1">
+            <nav class="custom-navbar navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <button type="button" data-sidebar-toggle class="hamburger-btn d-md-none" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <nav aria-label="breadcrumb" class="ms-2">
+                        <ol class="breadcrumb mb-0">
+                            {% if breadcrumbs %}
+                                {% for item in breadcrumbs %}
+                                    {% if item.url and not forloop.last %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ item.url }}">{{ item.label }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="breadcrumb-item active" aria-current="page">
+                                            {{ item.label }}
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    {% block page_title %}Mis casos{% endblock %}
+                                </li>
+                            {% endif %}
+                        </ol>
+                    </nav>
+                </div>
+            </nav>
+
+            <!-- Indicador HTMX global -->
+            <div id="relato-indicator" class="htmx-indicator position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+                <div class="spinner-border custom-spinner" role="status" aria-live="polite" aria-label="Cargando…" style="width:2rem;height:2rem;">
+                    <span class="visually-hidden">Cargando…</span>
+                </div>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="container-fluid p-4">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    {# <<<--- AQUI: contenedor global de notificaciones (una sola vez) --->>> #}
+    {% include "accidentes/notification.html" %}
+
+    <!-- Scripts (orden: Bootstrap -> HTMX -> tu JS) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+
+    {# JS global de notificaciones (auto-show de toasts + soporte HTMX/OOB) #}
+    <script>
+    (function () {
+      function showToastsIn(container) {
+        if (!container) return;
+        container.querySelectorAll('.toast').forEach(function (el) {
+          try { new bootstrap.Toast(el).show(); } catch (e) {}
+        });
+      }
+      function showAllToasts() {
+        showToastsIn(document.getElementById('toast-area'));
+      }
+
+      // Render completo
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showAllToasts);
+      } else {
+        showAllToasts();
+      }
+
+      // Swaps HTMX (incluye OOB)
+      if (window.htmx) {
+        document.body.addEventListener('htmx:afterSettle', function (evt) {
+          var tgt = evt.detail && evt.detail.target;
+          if (!tgt) return;
+          if (tgt.id === 'toast-area') {
+            showToastsIn(tgt);
+          } else if (tgt.querySelector) {
+            var area = tgt.querySelector('#toast-area');
+            if (area) showToastsIn(area);
+          }
+        });
+        document.body.addEventListener('htmx:afterOnLoad', function () {
+          // Por si el swap OOB reemplazó #toast-area sin ser el target directo
+          showAllToasts();
+        });
+      }
+    })();
+    </script>
+
+    {# Tu JS global #}
+    <script src="{% static 'js/notification.js' %}"></script>
+
+    {% block extra_js %}
+    <script>
+    (function () {
+      const STATE = { initialized: false, locked: false };
+      const gid = id => document.getElementById(id);
+
+      function openSidebar() {
+        const sidebar = gid('sidebar');
+        const overlay = gid('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        sidebar.classList.add('show');
+        overlay.classList.add('show');
+        if (!STATE.locked) {
+          document.body.style.overflow = 'hidden';
+          STATE.locked = true;
+        }
+      }
+
+      function closeSidebar() {
+        const sidebar = gid('sidebar');
+        const overlay = gid('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+        if (STATE.locked) {
+          document.body.style.overflow = '';
+          STATE.locked = false;
+        }
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+      }
+
+      function toggleSidebar() {
+        const sidebar = gid('sidebar');
+        if (!sidebar) return;
+        sidebar.classList.contains('show') ? closeSidebar() : openSidebar();
+      }
+
+      window._sidebar = { openSidebar, closeSidebar, toggleSidebar };
+
+      function attachGlobalHandlersOnce() {
+        if (STATE.initialized) return;
+        STATE.initialized = true;
+
+        document.addEventListener('click', function (evt) {
+          const toggleBtn = evt.target.closest('[data-sidebar-toggle], #sidebarToggle');
+          if (toggleBtn) { 
+            evt.preventDefault(); 
+            evt.stopPropagation();
+            toggleSidebar(); 
+            return; 
+          }
+
+          const overlay = evt.target.closest('#sidebarOverlay');
+          if (overlay) { 
+            evt.preventDefault(); 
+            closeSidebar(); 
+            return; 
+          }
+
+          const linkInsideSidebar = evt.target.closest('#sidebar .sidebar-nav-link');
+          if (linkInsideSidebar && window.innerWidth < 1200) { 
+            closeSidebar(); 
+            return; 
+          }
+        });
+
+        window.addEventListener('resize', function () {
+          if (window.innerWidth >= 1200) closeSidebar();
+        });
+
+        document.addEventListener('htmx:afterSwap', function () {
+          const sidebar = gid('sidebar');
+          if (!sidebar || !sidebar.classList.contains('show')) {
+            document.body.style.overflow = '';
+            STATE.locked = false;
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') closeSidebar();
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', attachGlobalHandlersOnce);
+      document.addEventListener('htmx:load', attachGlobalHandlersOnce);
+    })();
+    document.body.addEventListener('file-download', function (evt) {
+      var detail = evt.detail || {};
+      if (detail.url) window.location = detail.url;
+    });
+    </script>
+    {% endblock %}
+</body>
+</html>

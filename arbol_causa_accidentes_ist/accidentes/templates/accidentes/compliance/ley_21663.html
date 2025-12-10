@@ -1,0 +1,73 @@
+<section>
+<section>
+    <h2 class="h5">1) Alcance y principios</h2>
+    <p>
+        Esta política se enmarca en la Ley N.º 21.663 (Ley Marco de Ciberseguridad) y establece el marco de
+        cumplimiento del sistema <em>IST Investiga: Asistente de Accidentes Laborales</em>. Su objetivo es asegurar
+        la seguridad, disponibilidad y trazabilidad de los datos de investigación de accidentes, aplicando el
+        principio de <strong>seguridad y privacidad desde el diseño</strong> y garantizando la coordinación con la
+        Agencia Nacional de Ciberseguridad (ANCI) cuando corresponda.
+    </p>
+
+    <h2 class="h5 mt-3">2) Sistema de Gestión de Seguridad de la Información (SGSI)</h2>
+    <ul>
+        <li>
+        <strong>Inventario y clasificación:</strong> cada módulo de la plataforma (empresa, trabajador, accidente,
+        entrevistas, hechos, árbol de causas) se considera un activo crítico. La información sensible
+        (datos personales y de salud) se clasifica y se protege con controles de acceso diferenciados.
+        </li>
+        <li>
+        <strong>Gestión de proveedores:</strong> los contratos y servicios de terceros (hosting, correo, nube)
+        incluyen cláusulas de seguridad y protección de datos alineadas con la normativa de la ANCI.
+        </li>
+        <li>
+        <strong>Desarrollo seguro:</strong> la arquitectura en Django contempla separación de ambientes
+        (desarrollo, pruebas, producción), revisiones de código y sanitización de datos antes de almacenarlos
+        en MySQL.
+        </li>
+        <li>
+        <strong>Cifrado:</strong> los datos sensibles se transmiten por HTTPS/TLS y se almacenan cifrados en reposo,
+        conforme al riesgo identificado.
+        </li>
+    </ul>
+
+    <h2 class="h5 mt-3">3) Gestión de incidentes y reporte</h2>
+    <p>
+        Existen procesos de detección, análisis y respuesta a incidentes de ciberseguridad. Si se compromete
+        la disponibilidad o integridad de datos de accidentes, se notificará al CSIRT Nacional dentro de los
+        plazos legales (alerta temprana y reporte dentro de los tiempos establecidos). El sistema mantiene
+        registros de logs inviolables para asegurar la trazabilidad.
+    </p>
+
+    <h2 class="h5 mt-3">4) Continuidad y resiliencia</h2>
+    <ul>
+        <li>
+        <strong>Planes de continuidad:</strong> definidos con RTO/RPO acordes a la criticidad de los procesos
+        de investigación.
+        </li>
+        <li>
+        <strong>Backups:</strong> respaldos automáticos cifrados de la base de datos y de la carpeta de
+        documentos (MEDIA_ROOT), con pruebas periódicas de restauración.
+        </li>
+        <li>
+        <strong>Ejercicios de crisis:</strong> simulacros de indisponibilidad y recuperación controlada
+        para validar la resiliencia del servicio.
+        </li>
+    </ul>
+
+    <h2 class="h5 mt-3">5) Auditoría y mejora continua</h2>
+    <p>
+        Se realizan auditorías técnicas periódicas, seguimiento de métricas de desempeño (por ejemplo, tiempo
+        medio de cierre de caso y rechazos administrativos por falta de evidencia) y revisiones ejecutivas con
+        la dirección de IST para asegurar la mejora continua y el cumplimiento normativo.
+    </p>
+
+    <h2 class="h5 mt-3">6) Publicación y vigencia</h2>
+    <p>
+        Esta política se ajusta a la Ley N.º 21.663 y a las resoluciones de la ANCI. Se actualiza de forma
+        periódica y sus nuevas versiones se publican en la plataforma y se notifican a los usuarios antes de
+        su entrada en vigor.
+    </p>
+</section>
+
+</section>

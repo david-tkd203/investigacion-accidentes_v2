@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <body style="font-family: Arial, sans-serif; line-height:1.5;">
+    <p>Hola {{ user.get_full_name|default:user.username }},</p>
+    <p>Se te ha asignado un nuevo accidente en el asistente de investigación de accidentes.</p>
+
+
+    {% if assigned_by %}
+    <li><b>Asignado por:</b> {{ assigned_by.get_full_name|default:assigned_by.username }}</li>
+    {% endif %}
+
+    <p><a href="{{ case_url }}">Para revisarlo, haz clic aquí.</a></p>
+
+    <p>Saludos,</p>
+  </body>
+</html>

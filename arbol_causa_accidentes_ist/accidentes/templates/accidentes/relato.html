@@ -1,0 +1,245 @@
+{# accidentes/templates/relato.html #}
+{% extends "accidentes/base.html" %}
+{% load static %}
+{% block title %}Relato del Accidente{% endblock %}
+
+{% block extra_css %}
+  <!--<link rel="stylesheet" href="{% static 'accidentes/css/relato.css' %}">-->
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width: 1200px;">
+<div class="titular-page">
+  <div class="card-header">
+    <h5 class="card-title mb-1">
+      <i class="fas fa-file-alt me-2" style="color: var(--primary-color);"></i>
+      Relato del Accidente
+    </h5>
+    <p class="card-text text-muted mb-0">Construye y valida el relato con apoyo de IA</p>
+  </div>
+</div>
+
+{% include "accidentes/includes/disclaimer.html" %}
+
+{# Wrapper principal: se reemplaza por HTMX con el partial #}
+<div id="relato-wrapper" class="row gy-4" style="visibility:hidden;">
+  {% include "accidentes/partials/relato/_relato_wrapper.html" %}
+</div>
+
+{# Indicador global para todas las acciones HTMX en esta vista #}
+<div id="relato-indicator" class="htmx-indicator text-center my-3" aria-live="polite">
+  <div class="spinner-border" role="status" aria-hidden="true"></div>
+  <span class="ms-2">Procesando…</span>
+</div>
+
+{# ===== Modal: Confirmar reinicio ===== #}
+<div class="modal fade" id="resetModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post"
+          hx-post="{% url 'accidentes:ia_relato' codigo %}"
+          hx-target="#relato-wrapper"
+          hx-swap="innerHTML"
+          hx-indicator="#relato-indicator">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="eliminar_y_reiniciar">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar relato actual</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Se marcará el relato como no vigente. Podrás generar uno nuevo de inmediato. ¿Deseas continuar?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function(){
+  const SEL = '#relato-wrapper textarea';
+  // Clave por accidente para persistir alturas entre recargas
+  const STORAGE_KEY = 'relato-heights:{{ codigo|escapejs }}';
+  let heightCache = Object.create(null);
+  let queueNextAction = null; // encadena siguiente paso tras guardar
+
+  // ---------- utilidades ----------
+  function getLineHeight(el){
+    const cs = getComputedStyle(el);
+    if (cs.lineHeight === 'normal'){
+      const fs = parseFloat(cs.fontSize) || 16;
+      return Math.round(1.2 * fs);
+    }
+    return parseFloat(cs.lineHeight) || 20;
+  }
+  function isVisible(el){
+    return !!(el && (el.offsetParent || el.getClientRects().length));
+  }
+
+  function autosizeOne(el){
+    if (!el || el.nodeName !== 'TEXTAREA' || !isVisible(el)) return;
+    const minRows = Math.max(parseInt(el.getAttribute('rows') || '2', 10), 2);
+    const minH = Math.max(24, Math.round(getLineHeight(el) * minRows));
+    el.style.height = 'auto';
+    requestAnimationFrame(() => {
+      const target = Math.max(el.scrollHeight, minH) + 2;
+      el.style.height = target + 'px';
+    });
+  }
+  function autosizeAll(scope){
+    (scope || document).querySelectorAll(SEL).forEach(autosizeOne);
+  }
+
+  // ---------- snapshot / restore ----------
+  function keyFor(el){
+    // usa id si existe; si no, name
+    return el.id || el.name || '';
+  }
+  function snapshotHeights(){
+    heightCache = Object.create(null);
+    document.querySelectorAll(SEL).forEach(t => {
+      const k = keyFor(t);
+      if (!k) return;
+      const h = t.offsetHeight || parseFloat(getComputedStyle(t).height) || 0;
+      if (h > 0) heightCache[k] = h;
+    });
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(heightCache)); } catch(_){}
+  }
+  function restoreHeights(scope){
+    const root = scope || document;
+    let cache = null;
+    try { cache = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}'); } catch(_){}
+    const data = cache && typeof cache === 'object' ? cache : heightCache;
+
+    Object.keys(data).forEach(k => {
+      let t = root.getElementById(k);
+      if (!t) t = root.querySelector(`textarea[name="${CSS.escape(k)}"]`);
+      if (!t) return;
+      const h = data[k];
+      t.style.minHeight = h + 'px';
+      t.style.height    = h + 'px';
+    });
+  }
+
+  // ---------- mostrar wrapper cuando ya está estable ----------
+  function revealWrapperAfterAutosize(scope){
+    const wrap = document.getElementById('relato-wrapper');
+    if (!wrap) return;
+    // Restaurar alturas previas para evitar salto
+    restoreHeights(scope);
+    // Pasadas de autosize (por si falta asentar layout/recursos)
+    autosizeAll(scope);
+    setTimeout(() => autosizeAll(scope), 120);
+    setTimeout(() => autosizeAll(scope), 360);
+    // Mostrar tras el siguiente frame
+    requestAnimationFrame(() => { wrap.style.visibility = 'visible'; });
+  }
+
+  // ---------- atajos con Enter para encadenar pasos ----------
+  // Encuentra y "envía" un form con name="action" y value específico (HTMX o normal)
+  function submitAction(value){
+    const form = document.querySelector(`#relato-wrapper form`);
+    if (!form) return false;
+    // Si el form tiene un input/btn con ese action, créalo on-the-fly para el submit
+    let hidden = form.querySelector(`input[name="action"][value="${value}"]`);
+    if (!hidden) {
+      hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = 'action';
+      hidden.value = value;
+      form.appendChild(hidden);
+    }
+    // Si es HTMX (hx-post/hx-target en el form), dispara el submit nativo
+    form.requestSubmit ? form.requestSubmit() : form.submit();
+    return true;
+  }
+
+  // Guardar y encadenar siguiente
+  function chainSaveAndNext(textareaName, saveAction, nextAction){
+    const area = document.querySelector(`#relato-wrapper textarea[name="${textareaName}"]`);
+    if (!area) return false;
+    queueNextAction = nextAction;     // marcamos qué sigue
+    // Antes de enviar, snapshot para evitar salto al volver
+    snapshotHeights();
+    return submitAction(saveAction);
+  }
+
+  // Atajo: Enter para guardar y generar siguiente
+  document.addEventListener('keydown', function(e){
+    // Si el foco está dentro del wrapper y es ENTER (sin Shift para permitir multilinea)
+    if (e.key !== 'Enter') return;
+    const active = document.activeElement;
+    if (!active || !active.closest || !active.closest('#relato-wrapper')) return;
+
+    // Evita enviar si el usuario pretende saltar de línea con Shift+Enter
+    if (active.matches('textarea') && !e.shiftKey){
+      // Decide cadena según textarea activo
+      if (active.name === 'respuesta_1'){
+        e.preventDefault();
+        chainSaveAndNext('respuesta_1', 'guardar_respuesta_1', 'generar_pregunta_2');
+      } else if (active.name === 'respuesta_2'){
+        e.preventDefault();
+        chainSaveAndNext('respuesta_2', 'guardar_respuesta_2', 'generar_pregunta_3');
+      } else if (active.name === 'respuesta_3'){
+        e.preventDefault();
+        chainSaveAndNext('respuesta_3', 'guardar_respuesta_3', 'generar_relato_final');
+      }
+    }
+  });
+
+  // ---------- hooks HTMX ----------
+  // Antes de cualquier request HTMX originado dentro del wrapper → snapshot
+  document.body.addEventListener('htmx:beforeRequest', function(evt){
+    const el = evt.target;
+    if (el && el.closest && el.closest('#relato-wrapper')) {
+      snapshotHeights();
+    }
+  });
+
+  // Tras cada swap: restaurar alturas, autosize y, si corresponde, encadenar acción
+  document.body.addEventListener('htmx:afterSwap', function(evt){
+    const t = evt.detail && evt.detail.target;
+    const scope = (t && (t.id === 'relato-wrapper' || t.querySelector?.('#relato-wrapper'))) ? t : document;
+
+    // Cierra modales abiertos (si hubiera)
+    document.querySelectorAll('.modal.show').forEach(m => { try{bootstrap.Modal.getInstance(m)?.hide();}catch(_){}});
+
+    // Mostrar/estabilizar wrapper
+    revealWrapperAfterAutosize(scope);
+
+    // ¿Hay acción encadenada?
+    if (queueNextAction){
+      const next = queueNextAction;
+      queueNextAction = null;
+      // pequeña espera para que el DOM quede listo
+      setTimeout(() => submitAction(next), 50);
+    }
+  });
+
+  // ---------- carga inicial ----------
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', () => {
+      revealWrapperAfterAutosize(document);
+    });
+  } else {
+    revealWrapperAfterAutosize(document);
+  }
+
+  // ---------- resize ----------
+  let rezTimer;
+  window.addEventListener('resize', function(){
+    clearTimeout(rezTimer);
+    rezTimer = setTimeout(() => autosizeAll(document), 120);
+  });
+
+})();
+</script>
+{% endblock %}

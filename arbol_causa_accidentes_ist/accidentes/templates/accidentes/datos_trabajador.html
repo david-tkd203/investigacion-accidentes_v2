@@ -1,0 +1,14 @@
+{% extends "accidentes/base.html" %}
+{% load static %}
+
+{% block title %}Información del Trabajador{% endblock %}
+{% block content %}
+<div id="form-container" class="mx-auto" style="max-width: 1200px;">
+    <div 
+        hx-get="{% url 'accidentes:trabajador' codigo %}" 
+        hx-trigger="load" 
+        hx-target="#form-container" 
+        hx-swap="innerHTML">
+    </div>
+</div>
+{% endblock %}

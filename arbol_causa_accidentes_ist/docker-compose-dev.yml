@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  bd-investigacion:
+    image: mysql:8.0
+    container_name: bd-investigacion
+    restart: no
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - db_network
+
+  investiga-app:
+    container_name: investiga_app
+    build: .
+    restart: no
+    env_file:
+      - .env
+    depends_on:
+      - bd-investigacion
+    # ⬇️ Produce los estáticos en /usr/src/app/staticfiles (STATIC_ROOT)
+    volumes:
+      - staticfiles:/usr/src/app/staticfiles
+      - protected_media:/usr/src/app/protected_media
+      - ./arbol_causa_accidentes_ist/accidentes/setting/data/holdings.json:/usr/src/app/arbol_causa_accidentes_ist/accidentes/setting/data/data.json:ro
+      # (opcional en prod) evita montar el repo completo para no pisar la imagen:
+      # - .:/usr/src/app
+    environment:
+      DB_ENGINE: ${DB_ENGINE}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASS: ${DB_PASS}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEFAULT_MODEL: ${DEFAULT_MODEL}
+      FALLBACK_MODEL: ${FALLBACK_MODEL}
+    networks:
+      - db_network
+      - web_network
+
+  nginx-proxy:
+    image: nginx:latest
+    container_name: nginx_proxy
+    restart: no
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - staticfiles:/usr/src/app/staticfiles:ro
+      - protected_media:/usr/src/app/protected_media:ro
+    depends_on:
+      - investiga-app
+    networks:
+      - web_network
+
+networks:
+  db_network:
+    driver: bridge
+  web_network:
+    driver: bridge
+
+volumes:
+  staticfiles:
+  protected_media:

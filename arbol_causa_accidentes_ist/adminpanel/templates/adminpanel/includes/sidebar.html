@@ -1,0 +1,62 @@
+{# adminpanel/templates/adminpanel/includes/sidebar.html #}
+<aside class="custom-sidebar d-flex flex-column" id="sidebar">
+  <a href="{% url 'adminpanel:mis_investigaciones' %}" class="sidebar-brand">
+    <div class="sidebar-brand-icon"></div>
+    <div>
+      <div class="fw-semibold">Adminpanel</div>
+      <div style="font-size: 0.75rem; opacity: 0.8;">Investigaciones</div>
+    </div>
+  </a>
+
+  <div class="sidebar-nav flex-grow-1">
+    <div class="sidebar-nav-label">Administración</div>
+
+    {# Guardamos url_name y rol en variables para no repetir resolución #}
+    {% with urlname=request.resolver_match.url_name role=request.user.rol %}
+      <ul class="list-unstyled mb-3">
+        <li>
+          <a href="{% url 'adminpanel:mis_investigaciones' %}"
+             class="sidebar-nav-link {% if urlname == 'mis_investigaciones' %}active{% endif %}">
+            <i class="fas fa-list-check sidebar-nav-icon"></i>
+            <span>Mis investigaciones</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'adminpanel:crear_investigacion' %}"
+             class="sidebar-nav-link {% if urlname == 'crear_investigacion' %}active{% endif %}">
+            <i class="fas fa-plus-circle sidebar-nav-icon"></i>
+            <span>Crear investigación</span>
+          </a>
+        </li>
+      </ul>
+
+      {# ============ Reportes ============ #}
+      {% if request.user.is_authenticated %}
+        {% if role == 'admin' or role == 'admin_ist' or role == 'admin_holding' or role == 'admin_empresa' or role == 'coordinador' %}
+          <div class="sidebar-nav-label">Reportes</div>
+          <ul class="list-unstyled mb-0">
+            <li>
+              <a href="{% url 'adminpanel:report_excel' %}"
+                 class="sidebar-nav-link {% if urlname == 'report_excel' %}active{% endif %}">
+                <i class="fa-solid fa-file-excel sidebar-nav-icon"></i>
+                <span>Reporte Excel</span>
+              </a>
+            </li>
+          </ul>
+        {% endif %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  {% if request.user.is_authenticated %}
+    <div class="p-3 logout-container">
+      <form action="{% url 'accounts:logout' %}" method="post" class="d-grid">
+        {% csrf_token %}
+        <button type="submit" class="btn-logout w-100 d-flex align-items-center">
+          <i class="fas fa-right-from-bracket me-2 logout-icon"></i>
+          <span class="fw-semibold">Cerrar sesión</span>
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</aside>

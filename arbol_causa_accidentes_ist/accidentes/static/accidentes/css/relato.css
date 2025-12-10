@@ -1,0 +1,225 @@
+/* accidentes/css/relato.css */
+body {
+    overflow-x: hidden;
+}
+
+textarea, .relato-wrapper, .profundidad-list .profundidad-item {
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #51287A;
+    --primary-light: rgba(81,40,122,0.1);
+    --bg-light: #f7f7f7;
+    --text-dark: #333;
+    --border-radius: 8px;
+    --font-family: 'Inter', sans-serif;
+}
+
+/* Container centering and spacing */
+.relato-wrapper {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+/* 0) Main content full width */
+.main-content {
+    align-items: stretch;
+    font-family: var(--font-family);
+}
+
+/* 1) Headings */
+.main-content h1,
+.main-content h2 {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-align: left;
+    margin: 0 auto;
+    margin-bottom: 1rem;
+}
+
+ h3 {
+    margin: 0 auto;
+}
+
+/* 2) Relato textarea */
+textarea[name="relato_input"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 250px;
+    padding: 16px;
+    border: 2px solid var(--primary-light);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    resize: vertical;
+    background: #fff;
+    color: var(--text-dark);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+textarea[name="relato_input"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--primary-light);
+    outline: none;
+}
+
+/* 3) Buttons */
+button.btn-guardar,
+button.btn-confirmar {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+button.btn-guardar:hover,
+button.btn-confirmar:hover {
+    background-color: #3e1f5e;
+    transform: translateY(-2px);
+}
+
+/* 4) Alert messages */
+.messages {
+    margin-top: 1rem;
+    padding: 0;
+    list-style: none;
+}
+.messages li {
+    padding: 12px;
+    margin-bottom: 0.75rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+.messages li.success { background: #e6f7e6; border-left: 4px solid #81c784; color: #2e7d32; }
+.messages li.error   { background: #ffe6e6; border-left: 4px solid #ef9a9a; color: #c62828; }
+.messages li.warning { background: #fff8e1; border-left: 4px solid #ffb74d; color: #ff6f00; }
+
+/* 5) Generated relato block */
+.relato-output {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    margin-top: 1.5rem;
+    white-space: pre-wrap;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+/* 6) Deep questions block */
+.profundidad-list {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.profundidad-list .profundidad-item {
+    position: relative;
+    background: var(--bg-light);
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: box-shadow 0.3s ease;
+}
+.profundidad-list .profundidad-item:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+}
+
+/* Category badge */
+.profundidad-list .profundidad-item::before {
+    content: attr(data-category);
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.profundidad-list .profundidad-item label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+.profundidad-list .profundidad-item p {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+/* 7) Response textarea */
+textarea[name^="respuesta_"] {
+    width: 100%;
+    max-height: 140px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: #fff;
+    color: var(--text-dark);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+    overflow-y: auto;
+    transition: border-color 0.3s ease;
+}
+textarea[name^="respuesta_"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* … resto del CSS … */
+
+/* MÓVIL: menú cerrado e icono visible */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block; /* muestra el botón ☰ */
+        z-index: 1100;
+    }
+    .sidebar {
+        position: fixed;
+        top: 0; left: -100%;            /* ② escondido fuera de pantalla */
+        width: 80%; max-width: 300px;
+        height: 100%;
+        transition: left 0.3s ease;
+        z-index: 1000;
+    }
+
+    /* ③ Cuando el checkbox está CHECKED, desliza el sidebar */
+    #nav-toggle:checked ~ .layout .sidebar {
+        left: 0 !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;      /* ocupa todo el ancho en móvil */
+        padding: 1rem;
+    }
+
+     h1, h2 {
+        width: 100%;
+        margin: 0 auto;
+        margin-top: 70px !important;
+        margin-bottom: 0px;
+    }
+    textarea,
+    .relato-output {
+        max-height: 60vh;
+    }
+
+    form {
+        width: 100%;
+        padding: 0rem;
+    }
+}
