@@ -1,29 +1,25 @@
 # IST Investiga — Asistente de Accidentes (Django)
 
-Plataforma web para **investigar accidentes laborales** con apoyo de **IA**, formularios guiados, gestión de documentos y **trazabilidad** de punta a punta. Orquesta entrevistas, relato, hechos, árbol de causa, medidas correctivas e informe final en un flujo único.
+Plataforma web **multi-tenant** para **investigar accidentes laborales** con apoyo de **IA**, formularios guiados, gestión de documentos y **trazabilidad** de punta a punta. Orquesta entrevistas, relato, hechos, árbol de causa, medidas correctivas e informe final en un flujo único.
 
-> Este README integra: la documentación existente del proyecto, la estructura real del repositorio y una guía extendida para desarrollo, despliegue y operación.
+> **⚠️ Migración Completada**: El sistema migró exitosamente de MySQL single-tenant a **PostgreSQL multi-tenant** con `django-tenants 3.5+`. Cada empresa opera en su propio esquema PostgreSQL aislado.
 
 ---
 
 ## Índice
 - [Contexto y Problema](#contexto-y-problema)
 - [Objetivo General y Específicos](#objetivo-general-y-específicos)
-- [Arquitectura y Tecnologías](#arquitectura-y-tecnologías)
-- [Estructura de Directorios (raíz)](#estructura-de-directorios-raíz)
-- [Módulos y Detalle de Carpetas](#módulos-y-detalle-de-carpetas)
-  - [core/](#core)
-  - [accidentes/](#accidentes)
-  - [adminpanel/](#adminpanel)
-  - [accounts/](#accounts)
+- [Arquitectura Multi-Tenant](#arquitectura-multi-tenant)
+- [Estructura de PostgreSQL](#estructura-de-postgresql)
+- [Comandos Esenciales](#comandos-esenciales)
+- [Estructura de Directorios](#estructura-de-directorios)
+- [Módulos del Sistema](#módulos-del-sistema)
 - [Roles del Sistema](#roles-del-sistema)
-- [Flujo de Uso (Guía de Usuario)](#flujo-de-uso-guía-de-usuario)
-- [Seguridad y Cumplimiento](#seguridad-y-cumplimiento)
-- [Configuración, Desarrollo y Scripts](#configuración-desarrollo-y-scripts)
-- [Despliegue (Docker Compose)](#despliegue-docker-compose)
+- [Flujo de Uso](#flujo-de-uso-guía-de-usuario)
+- [Desarrollo y Configuración](#configuración-desarrollo-y-scripts)
+- [Despliegue Docker](#despliegue-docker-compose)
 - [Pruebas](#pruebas)
 - [Roadmap](#roadmap)
-- [Créditos](#créditos)
 
 ---
 
@@ -33,15 +29,16 @@ Plataforma web para **investigar accidentes laborales** con apoyo de **IA**, for
 - Falta de **estandarización en cuestionarios** y guías, lo que provoca omisiones de preguntas clave, vacíos en la cronología y baja trazabilidad.
 - Uso de **IA** como componente aislado, sin integración con formularios, evidencia y controles de versión.
 - Riesgos legales y de cumplimiento por auditoría limitada y trazabilidad débil.
+- **Multi-tenancy**: Necesidad de aislar datos entre múltiples empresas clientes en la misma infraestructura.
 
-La plataforma apunta a unificar datos, estandarizar cuestionarios, **orquestar la IA dentro del proceso** y garantizar la **trazabilidad de extremo a extremo**.
+La plataforma unifica datos, estandariza cuestionarios, **orquesta la IA dentro del proceso**, garantiza **trazabilidad end-to-end** y **aísla datos por tenant** usando esquemas PostgreSQL.
 
 ---
 
 ## Objetivo General y Específicos
 
 **Objetivo General**  
-Diseñar e implementar una plataforma web integrada, basada en **Django** e **IA**, que automatice y centralice el flujo completo de investigación de accidentes laborales (entrevistas → evidencias → relato → hechos → árbol de causas → medidas → informe final).
+Diseñar e implementar una plataforma web integrada, basada en **Django** e **IA**, que automatice y centralice el flujo completo de investigación de accidentes laborales (entrevistas → evidencias → relato → hechos → árbol de causas → medidas → informe final) con **aislamiento multi-tenant**.
 
 **Objetivos Específicos**
 1. **Estandarizar** la generación de cuestionarios con IA, cubriendo factores técnicos, organizacionales y humanos.
@@ -49,44 +46,360 @@ Diseñar e implementar una plataforma web integrada, basada en **Django** e **IA
 3. **Centralizar** respuestas y evidencias (BD relacional + repositorio JSON) y habilitar informes con 1 clic.
 4. **Controlar calidad** con validaciones y alertas de campos faltantes para evitar rechazos administrativos.
 5. **Roles y permisos** con auditoría (quién hizo qué y cuándo).
+6. **Aislar datos** por empresa usando arquitectura multi-tenant con esquemas PostgreSQL independientes.
 
 ---
 
-## Arquitectura y Tecnologías
+## Arquitectura Multi-Tenant
 
-- **Backend:** Django + Python (apps: `accidentes`, `adminpanel`, `accounts`, `core`).
-- **Base de datos:** MySQL.
-- **Frontend:** Plantillas HTML + CSS/JS ligeros.
-- **IA Service:** utilidades y prompts versionados (`accidentes/setting/prompt/prompt.json`, `views_ia.py`, `views_api/prompt_utils.py`).
+### Tecnologías
+
+- **Backend:** Django 5.2 + Python 3.11
+- **Base de datos:** PostgreSQL 15-alpine
+- **Multi-tenancy:** `django-tenants 3.5+` (schema-based)
+- **Frontend:** Plantillas HTML + CSS/JS ligeros
+- **IA Service:** Prompts versionados (`accidentes/setting/prompt/`, `views_ia.py`)
 - **Almacenamiento:** 
-  - Ficheros en `protected_media/` (p. ej., `documentos/`, `informes/`).
-  - Estáticos en `static/` y `accidentes/static/accidentes/` (CSS/IMG).
-- **Despliegue:** Docker Compose (servicios `web`, `db`, `nginx`).
+  - Ficheros en `protected_media/` (documentos, informes)
+  - Estáticos en `static/` y `accidentes/static/`
+- **Despliegue:** Docker Compose (PostgreSQL, Django, Nginx)
+
+### Modelo de Tenant
+
+```python
+# core/models.py
+from django_tenants.models import TenantMixin, DomainMixin
+
+class Empresa(TenantMixin):
+    """Cada empresa = 1 tenant = 1 schema PostgreSQL"""
+    name = models.CharField(max_length=100)
+    rut = models.CharField(max_length=12, unique=True)
+    # Campos heredados de TenantMixin:
+    # - schema_name: Nombre del esquema PostgreSQL
+    # - created_on, updated_on
+
+class Domain(DomainMixin):
+    """Dominios asociados a cada tenant"""
+    # Ej: ebco.investigacion.com → schema ebco_sa_76525290
+```
+
+### SHARED_APPS vs TENANT_APPS
+
+**SHARED_APPS** (esquema `public`):
+- `django_tenants`
+- `django.contrib.admin`, `auth`, `contenttypes`, etc.
+- `core` (modelos Empresa/Domain)
+- `accounts` (User con FK a Empresa)
+
+**TENANT_APPS** (esquema por empresa):
+- `accidentes` (Holdings, Trabajadores, Accidentes, etc.)
+- `adminpanel`
+- `widget_tweaks`, `import_export`
 
 ---
 
-## Estructura de Directorios (raíz)
+## Estructura de PostgreSQL
+
+### Esquemas Creados (23 total)
+
+```
+public                    ← Compartido (auth, users, empresas)
+├─ ebco_sa_76525290       ← Tenant: Ebco S.A.
+├─ rendic_hermanos_79559_90440200  ← Tenant: Rendic Hermanos
+├─ ist_limitada_76005087  ← Tenant: IST Limitada
+├─ distribuidora_de_1_94096000    ← Tenant: Distribuidora de Lujos Cochifas
+... (22 tenants en total)
+```
+
+### Datos Migrados por Tenant
+
+| Tenant | Holdings | Trabajadores | Accidentes |
+|--------|----------|--------------|------------|
+| ebco_sa_76525290 | 5 | 108 | 113 |
+| rendic_hermanos_79559_90440200 | 5 | 30 | 9 |
+| ist_limitada_76005087 | 5 | 7 | 7 |
+| Otros 19 tenants | 5 c/u | 15 total | 12 total |
+| **TOTAL** | **5 holdings** | **160** | **141** |
+
+### Tablas por Esquema Tenant (23 tablas)
+
+```sql
+-- Verificar esquemas
+\dn
+
+-- Ver tablas en un tenant específico
+\dt ebco_sa_76525290.*
+
+-- Tablas principales:
+accidentes_holdings
+accidentes_empresas
+accidentes_centrostrabajo
+accidentes_trabajadores
+accidentes_accidentes
+accidentes_arbolcausas
+accidentes_declaraciones
+accidentes_documentos
+accidentes_hechos
+accidentes_informes
+accidentes_preguntasguia
+accidentes_prescripciones
+... (23 tablas en total)
+```
+
+---
+
+## Comandos Esenciales
+
+### 🐳 Docker - Iniciar/Detener
+
+```bash
+# Iniciar servicios en desarrollo
+cd "d:\Proyectos IST\investigacion-django_v2\arbol_causa_accidentes_ist"
+docker compose -f docker-compose-dev.yml up -d
+
+# Ver logs
+docker compose -f docker-compose-dev.yml logs -f
+
+# Detener servicios
+docker compose -f docker-compose-dev.yml down
+
+# Reconstruir imagen (tras cambios en requirements.txt)
+docker compose -f docker-compose-dev.yml build --no-cache
+```
+
+### 🔐 Crear Superusuario
+
+```bash
+# Opción A: Superusuario en esquema público (acceso global)
+docker exec -it investiga_app python manage.py createsuperuser --schema public
+
+# Opción B: Superusuario en tenant específico
+docker exec -it investiga_app python manage.py createsuperuser --schema ebco_sa_76525290
+
+# Datos recomendados:
+# Username: admin
+# Email: admin@investigacion.com
+# Password: [tu contraseña segura]
+```
+
+### 🗄️ PostgreSQL - Acceso Directo
+
+```bash
+# Conectar a PostgreSQL desde contenedor
+docker exec -it bd-investigacion psql -U investigacion_user -d investigacion-accidentes
+
+# Comandos útiles dentro de psql:
+\dn                     # Listar esquemas
+\dt public.*            # Tablas en esquema público
+\dt ebco_sa_76525290.*  # Tablas en tenant Ebco
+\d+ accidentes_empresas # Estructura de tabla
+
+# Consultas SQL
+SELECT schema_name FROM information_schema.schemata;
+SELECT COUNT(*) FROM ebco_sa_76525290.accidentes_trabajadores;
+```
+
+### 🔧 Django Management Commands
+
+```bash
+# Migraciones
+docker exec -it investiga_app python manage.py migrate_schemas --shared
+docker exec -it investiga_app python manage.py migrate_schemas
+
+# Shell interactivo con tenant
+docker exec -it investiga_app python manage.py tenant_command shell --schema ebco_sa_76525290
+
+# Crear tenant programáticamente
+docker exec -it investiga_app python manage.py shell
+>>> from core.models import Empresa, Domain
+>>> tenant = Empresa(schema_name='nueva_empresa_rut', name='Nueva Empresa', rut='12345678-9')
+>>> tenant.save()
+>>> domain = Domain(domain='nuevaempresa.localhost', tenant=tenant, is_primary=True)
+>>> domain.save()
+```
+
+### 📊 Importar Datos Legacy
+
+```bash
+# Script de importación multi-tenant
+docker exec -it investiga_app python importar_datos_multitenant.py
+
+# Ver progreso (el script muestra output detallado):
+# - Tenants creados
+# - Holdings importados
+# - Trabajadores por tenant
+# - Accidentes por tenant
+```
+
+### 🧪 Verificar Datos
+
+```bash
+# Verificar estructura PostgreSQL
+docker exec -it bd-investigacion psql -U investigacion_user -d investigacion-accidentes -c "\dn"
+
+# Contar registros en tenant específico
+docker exec -it bd-investigacion psql -U investigacion_user -d investigacion-accidentes -c "
+SELECT 
+    (SELECT COUNT(*) FROM ebco_sa_76525290.accidentes_holdings) AS holdings,
+    (SELECT COUNT(*) FROM ebco_sa_76525290.accidentes_trabajadores) AS trabajadores,
+    (SELECT COUNT(*) FROM ebco_sa_76525290.accidentes_accidentes) AS accidentes;
+"
+
+# Listar todos los tenants
+docker exec -it investiga_app python manage.py shell
+>>> from core.models import Empresa
+>>> for e in Empresa.objects.all(): print(f"{e.schema_name} - {e.name} ({e.rut})")
+```
+
+### 🌐 Acceso Web
+
+```bash
+# Admin Django (público)
+http://localhost/admin/
+
+# Para acceder a tenant específico, agregar en hosts:
+# C:\Windows\System32\drivers\etc\hosts (Windows)
+# /etc/hosts (Linux/Mac)
+127.0.0.1 ebco.localhost
+127.0.0.1 rendic.localhost
+
+# Luego acceder:
+http://ebco.localhost/admin/
+```
+
+### 🔄 Backup y Restore
+
+```bash
+# Backup completo (todos los esquemas)
+docker exec bd-investigacion pg_dump -U investigacion_user investigacion-accidentes > backup_completo.sql
+
+# Backup de un tenant específico
+docker exec bd-investigacion pg_dump -U investigacion_user -n ebco_sa_76525290 investigacion-accidentes > backup_ebco.sql
+
+# Restore
+docker exec -i bd-investigacion psql -U investigacion_user investigacion-accidentes < backup_completo.sql
+```
+
+---
+
+## Estructura de Directorios
 
 ```text
 arbol_causa_accidentes_ist/
-├─ core/               — Configuración Django (settings, urls, asgi, wsgi), email/services/utils.
-├─ accidentes/         — App principal: modelos, vistas, formularios, servicios; templates y estáticos propios.
-├─ adminpanel/         — Panel por investigación: vistas/urls/forms, plantillas del panel y estilos.
-├─ accounts/           — Autenticación/usuarios: backends, forms, migraciones y templates de login/reset.
-├─ templates/          — Plantillas globales.
-├─ static/             — Estáticos globales (css, img, js).
-├─ utils/              — Utilidades transversales.
-├─ config/             — Config/datos auxiliares (p. ej., accidentes_demo.json).
-├─ nginx/              — Configuración Nginx (investiga-app.conf).
-├─ protected_media/    — Archivos subidos/generados (documentos, informes). No se versiona.
-└─ mysql/              — Datos locales de MySQL (binlogs/metadata). No se versiona.
+├─ core/                     — Configuración Django (settings, urls, asgi, wsgi)
+│  ├─ models.py              — Empresa (TenantMixin), Domain (DomainMixin)
+│  ├─ settings.py            — SHARED_APPS, TENANT_APPS, DATABASE_ROUTERS
+│  └─ email_backends/        — Backends de email personalizados
+├─ accidentes/               — App principal (TENANT_APP)
+│  ├─ models.py              — Holdings, Empresas, Trabajadores, Accidentes, etc.
+│  ├─ views.py               — Vistas principales
+│  ├─ views_ia.py            — Integración con IA
+│  ├─ forms.py               — Formularios del sistema
+│  ├─ templates/             — Templates específicos de accidentes
+│  └─ static/                — CSS/JS de accidentes
+├─ adminpanel/               — Panel administrativo (TENANT_APP)
+├─ accounts/                 — Autenticación (SHARED_APP)
+│  ├─ models.py              — User con FK a core.Empresa
+│  └─ middleware.py          — Tenant assignment middleware
+├─ templates/                — Plantillas globales
+├─ static/                   — Estáticos globales (css, img, js)
+├─ protected_media/          — Archivos subidos (documentos, informes)
+├─ nginx/                    — Configuración Nginx
+├─ docker-compose-dev.yml    — Compose para desarrollo
+├─ dockerfile                — Imagen Django + django-tenants
+├─ requirements.txt          — Dependencias Python (incluye django-tenants)
+├─ importar_datos_multitenant.py  — Script de migración de datos
+└─ datos_exportados.json     — Datos legacy para importar
 ```
 
-> **Tip:** Puedes copiar este bloque tal cual en el `README.md` o generar una versión PNG para presentaciones.
+### Archivos de Configuración Multi-Tenant
+
+**docker-compose-dev.yml**
+```yaml
+services:
+  bd-investigacion:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: investigacion-accidentes
+      POSTGRES_USER: investigacion_user
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  investiga_app:
+    build: .
+    depends_on:
+      bd-investigacion:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://investigacion_user:1234@bd-investigacion:5432/investigacion-accidentes
+```
+
+**requirements.txt** (fragmento relevante)
+```
+Django>=5.2
+django-tenants>=3.5
+psycopg2-binary>=2.9.9
+django-widget-tweaks
+django-import-export
+```
+
+**core/settings.py** (fragmento multi-tenant)
+```python
+# Apps compartidas (esquema public)
+SHARED_APPS = [
+    'django_tenants',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'core',
+    'accounts',
+]
+
+# Apps por tenant (esquema independiente)
+TENANT_APPS = [
+    'accidentes',
+    'adminpanel',
+    'widget_tweaks',
+    'import_export',
+]
+
+INSTALLED_APPS = SHARED_APPS + TENANT_APPS
+
+# Modelo de tenant
+TENANT_MODEL = "core.Empresa"
+TENANT_DOMAIN_MODEL = "core.Domain"
+
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'NAME': 'investigacion-accidentes',
+        'USER': 'investigacion_user',
+        'PASSWORD': '1234',
+        'HOST': 'bd-investigacion',
+        'PORT': '5432',
+    }
+}
+
+DATABASE_ROUTERS = ['django_tenants.routers.TenantSyncRouter']
+
+# Middleware
+MIDDLEWARE = [
+    'django_tenants.middleware.main.TenantMainMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    # ...otros middlewares
+]
+```
 
 ---
 
-## Módulos y Detalle de Carpetas
+## Módulos del Sistema
 
 ### core/
 

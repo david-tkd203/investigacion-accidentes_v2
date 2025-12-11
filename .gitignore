@@ -1,3 +1,161 @@
+# ============================================
+# ARCHIVOS SENSIBLES (CRÍTICO - NO VERSIONAR)
+# ============================================
+
+# Variables de entorno con API keys, passwords, secrets
+.env
+.env.*
+*.env
+*.env.example
+!.env.template
+
+# Certificados SSL y claves privadas
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ============================================
+# BASES DE DATOS
+# ============================================
+
+# SQLite
+*.sqlite3
+*.db
+db.sqlite3
+
+# PostgreSQL data
+postgres_data/
+postgresql_data/
+/arbol_causa_accidentes_ist/postgres_data
+/arbol_causa_accidentes_ist/postgresql_data
+pgdata/
+
+# MySQL data
+mysql/
+/arbol_causa_accidentes_ist/mysql
+mysql_backup*/
+
+# Dumps y backups de BD
+*.sql
+*.dump
+*.bak
+datos_negocio.sql
+datos_negocios.sql
+
+# ============================================
+# DATOS EXPORTADOS Y SENSIBLES
+# ============================================
+
+datos_exportados*.json
+backup_*.json
+*_backup_*.*
+
+# ============================================
+# DJANGO
+# ============================================
+
+# Static files
 /arbol_causa_accidentes_ist/staticfiles
-./datos_negocio.sql
-./datos_negocios.sql
+staticfiles/
+static_root/
+
+# Media files (pueden contener datos personales)
+protected_media/
+media/
+
+# Django migrations (descomentar si quieres ignorarlas)
+# **/migrations/*.py
+# !**/migrations/__init__.py
+
+# Local settings
+local_settings.py
+settings_local.py
+
+# ============================================
+# PYTHON
+# ============================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+.env/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# ============================================
+# DOCKER
+# ============================================
+
+# Docker volumes locales
+docker-compose.override.yml
+
+# ============================================
+# LOGS Y TEMPORALES
+# ============================================
+
+*.log
+*.pot
+*.pyc
+*.mo
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# BACKUPS Y REPORTES
+# ============================================
+
+backups/
+*.backup
+reportes_generados/
+informes_generados/

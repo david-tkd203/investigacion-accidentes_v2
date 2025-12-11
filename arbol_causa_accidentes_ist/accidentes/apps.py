@@ -10,5 +10,5 @@ class AccidentesConfig(AppConfig):
 
     def ready(self):
         from accidentes import signals
-        print("✅ [Accidentes] ready(): signals importados")  # DEBUG visible en consola
+        # print("✅ [Accidentes] ready(): signals importados")  # DEBUG visible en consola
         logger.info("[Accidentes] ready(): signals importados")

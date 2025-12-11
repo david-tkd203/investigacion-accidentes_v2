@@ -1,14 +1,21 @@
 #!/bin/sh
 set -e
 
-# Espera inicial (configurable vía DB_WAIT_SECONDS); por defecto 30s
-sleep "${DB_WAIT_SECONDS:-100}"
+echo "🔗 Conectando a PostgreSQL (Docker healthcheck ya verificó la conexión)..."
+echo "⏳ Esperando 5 segundos adicionales para asegurar que PostgreSQL esté completamente listo..."
+sleep 5
 
-echo "Generando migraciones"
+echo "📋 Generando migraciones para core (tablas de tenants)..."
+python manage.py makemigrations core --noinput
+
+echo "📋 Generando migraciones para otras apps..."
 python manage.py makemigrations --noinput
 
-echo "Haciendo migraciones..."
-python manage.py migrate --noinput
+echo "🗄️ Migrando esquema compartido (todas las apps compartidas incluyendo core)..."
+python manage.py migrate_schemas --shared --noinput
+
+echo "🏢 Migrando esquemas de tenants..."
+python manage.py migrate_schemas --tenant --noinput
 
 echo "Estaticos..."
 python manage.py collectstatic --noinput

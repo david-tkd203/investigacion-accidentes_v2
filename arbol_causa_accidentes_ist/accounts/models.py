@@ -48,20 +48,18 @@ class User(AbstractUser):
     team = models.CharField(max_length=10, choices=TEAM_CHOICES, default="adherente")
     rol  = models.CharField(max_length=35, choices=ROL_CHOICES, default="investigador")
 
-    empresa = models.ForeignKey(
-        "accidentes.Empresas",
+    # Relación con el tenant (empresa) - para arquitectura multi-tenant
+    tenant = models.ForeignKey(
+        "core.Empresa",
         null=True, blank=True,
         on_delete=models.SET_NULL,
-        related_name="auth_users",          
-        related_query_name="auth_user",     
+        related_name="usuarios",          
+        related_query_name="usuario",
+        help_text="Tenant (empresa) al que pertenece el usuario"
     )
-    holding = models.ForeignKey(
-        "accidentes.Holdings",
-        null=True, blank=True,
-        on_delete=models.SET_NULL,
-        related_name="auth_users",          
-        related_query_name="auth_user",
-    )
+    
+    # NOTA: Las relaciones con empresa/holding legacy se manejarán 
+    # dentro del esquema del tenant, no en el esquema compartido
 
     rut    = models.CharField(max_length=12, unique=True, null=True, blank=True,
                               help_text="Formato 12.345.678-5 o 12345678-5")

@@ -53,7 +53,7 @@ class Empresas(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'empresas'
+        db_table = 'empresas_legacy'  # Renombrado temporalmente para evitar conflicto con django-tenants
         indexes = [
             models.Index(fields=["rut_empresa"]),
             models.Index(fields=["holding", "empresa_sel"]),

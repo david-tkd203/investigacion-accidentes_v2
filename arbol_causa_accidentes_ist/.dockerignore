@@ -1,18 +1,46 @@
-**/.git
-**/.gitignore
-**/__pycache__/
-**/*.pyc
-**/*.pyo
-**/*.pyd
-**/.vscode/
-**/.idea/
-**/*.swp
-**/*.bak
-**/.DS_Store
-**/Thumbs.db
-**/.AppleDouble
-mysql/
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode
+.idea
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Databases - IMPORTANTE: excluir folders grandes
+mysql
+mysql_backup
+mysql_backup_*
+postgresql_data
+db.sqlite3
+*.sql
+
+# Media - NO incluir en imagen Docker
+staticfiles
+protected_media
+
+# Logs
+*.log
+
+# Certificates
 letsencrypt
 certbot
 *.pem
 *.key
+
+# Exports
+datos_exportados*.json
+
+# Docs
+*.md
+README*

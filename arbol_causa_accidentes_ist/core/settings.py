@@ -68,19 +68,37 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
 
 # Application definition
 
-INSTALLED_APPS = [
+# Apps compartidas entre todos los tenants
+SHARED_APPS = [
+    "django_tenants",  # Debe estar primero
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "core.apps.CoreConfig",  # DEBE ESTAR ANTES de accounts (User tiene FK a Empresa)
+    "accounts.apps.AccountsConfig",
+]
+
+# Apps específicas de cada tenant
+TENANT_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
     "accidentes.apps.AccidentesConfig",
     "widget_tweaks",
     "adminpanel",
     "import_export",
-    "accounts.apps.AccountsConfig"
 ]
+
+INSTALLED_APPS = list(set(SHARED_APPS + TENANT_APPS))
+
+# Configuración de django-tenants
+TENANT_MODEL = "core.Empresa"
+TENANT_DOMAIN_MODEL = "core.Domain"
 
 AUTHENTICATION_BACKENDS = [
     "accounts.backends.RutOnlyBackend",
@@ -89,6 +107,7 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
+    "django_tenants.middleware.main.TenantMainMiddleware",  # Debe estar primero
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -144,10 +163,10 @@ if (AMBIENTE := os.getenv("AMBIENTE", "produccion").lower()) == "desarrollo":
         }
     }
 else:
-    print("🚀 Modo producción: usando base de datos externa")
+    print("🚀 Modo producción: usando PostgreSQL con multi-tenancy")
     DATABASES = {
         'default': {
-            'ENGINE'  : 'django.db.backends.' + DB_ENGINE,
+            'ENGINE'  : 'django_tenants.postgresql_backend',  # Usar el backend de django-tenants
             'NAME'    : DB_NAME,
             'USER'    : DB_USERNAME,
             'PASSWORD': DB_PASS,
@@ -155,6 +174,8 @@ else:
             'PORT'    : DB_PORT,
         }
     }
+
+DATABASE_ROUTERS = ['django_tenants.routers.TenantSyncRouter']
 
 
 # Password validation

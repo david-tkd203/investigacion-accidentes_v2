@@ -2,20 +2,25 @@ version: '3.8'
 
 services:
   bd-investigacion:
-    image: mysql:8.0
+    image: postgres:15-alpine
     container_name: bd-investigacion
     restart: no
     ports:
-      - "3306:3306"
+      - "5432:5432"
     env_file:
       - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
-      - ./mysql:/var/lib/mysql
+      - postgresql_data:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - db_network
 
@@ -26,7 +31,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - bd-investigacion
+      bd-investigacion:
+        condition: service_healthy
     # ⬇️ Produce los estáticos en /usr/src/app/staticfiles (STATIC_ROOT)
     volumes:
       - staticfiles:/usr/src/app/staticfiles
@@ -71,5 +77,6 @@ networks:
     driver: bridge
 
 volumes:
+  postgresql_data:
   staticfiles:
   protected_media:
